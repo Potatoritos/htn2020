@@ -1,6 +1,5 @@
 class Blob {
     constructor() {
-        var blobimg = document.getElementById("blobimg");
         this.body = Matter.Bodies.rectangle(400, 0, 50, 50, {
             mass: 100,
             label: 'blob',
@@ -21,6 +20,8 @@ class Blob {
         this.isMovingLeft = false;
         this.isMovingRight = false;
         this.isHoldingJump = false;
+
+        this.isFrozen = false;
         
         this.isOnGround = false;
     }
@@ -31,6 +32,7 @@ class Blob {
         this.body.render.sprite.texture = 'img/blob.png';
     }
     doMoveLeft() {
+        if (this.isFrozen) return;
         Matter.Body.setVelocity(this.body, {x:-this.moveSpeed, y:this.body.velocity.y});
     }
     stopMoveLeft() {
@@ -43,6 +45,7 @@ class Blob {
         this.body.render.sprite.texture = 'img/blobflipped.png';
     }
     doMoveRight() {
+        if (this.isFrozen) return;
         Matter.Body.setVelocity(this.body, {x:this.moveSpeed, y:this.body.velocity.y});
     }
     stopMoveRight() {
@@ -58,7 +61,7 @@ class Blob {
     }
 
     jump() { // this resets x velocity (should not reset)
-        if (!this.isOnGround) return;
+        if (!this.isOnGround || this.isFrozen) return;
         
         Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpSpeed});
         this.isOnGround = false;
