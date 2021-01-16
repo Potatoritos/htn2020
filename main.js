@@ -3,20 +3,30 @@ class Blob {
         this.x = 0;
         this.y = 0;
         
-        this.dx = 0;
-        this.dy = 0;
+        this.dx = 20;
+        this.dy = 5;
+    }
+
+    move() {
+        this.x += this.dx;
+        this.y += this.dy;
     }
 }
 
 class Game {
-    constructor() {
+    start() {
         this.canvas = document.getElementById("display");
-        this.ctx = canvas.getContext("2d");
+        this.ctx = this.canvas.getContext("2d");
         this.blob = new Blob();
-        setInterval(this.loop, 100);
+
+        var t = this;
+
+        setInterval(function() {
+            t.loop();
+        }, 1000);
     }
 
-    function drawBlob() {
+    drawBlob() {
         this.ctx.beginPath();
         this.ctx.rect(this.blob.x, this.blob.y, 50, 50);
         this.ctx.fillStyle = "#000000";
@@ -24,14 +34,15 @@ class Game {
         this.ctx.closePath();
     }
 
-    function loop() {
+    loop() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        drawBlob();
         
-        this.blob.x += this.blob.dx;
-        this.blob.y += this.blob.dy;
-    }
+        this.blob.move();
+
+        this.drawBlob();
+    }       
 }
 
-const game = new Game();
+var game = new Game();
+
+game.start();
