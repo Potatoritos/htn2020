@@ -12,11 +12,11 @@ class Blob {
     }
 
     moveLeft() { // this causes lag (and resets y vel...)
-        Matter.Body.setVelocity(this.body, {x:-this.moveSpeed, y:0});
+        Matter.Body.setVelocity(this.body, {x:-this.moveSpeed, y:this.body.velocity.y});
     }
 
     moveRight() { // same here
-        Matter.Body.setVelocity(this.body, {x:this.moveSpeed, y:0});
+        Matter.Body.setVelocity(this.body, {x:this.moveSpeed, y:this.body.velocity.y});
     }
 
     jump() { // this resets x velocity (should not reset)
