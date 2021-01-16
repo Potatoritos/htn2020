@@ -146,7 +146,15 @@ class Game {
                     this.blob.body.render.sprite.yOffset -= 0.1;
                 },
                 down: () => {}
-            }
+            },
+			20: { //Caps lock
+				up: () =>{
+					this.blob.isFrozen = true;
+				},
+				down: () => {
+					this.blob.isFrozen = false;
+				}
+			}
         };
         
         var t = this;
