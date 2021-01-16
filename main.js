@@ -22,13 +22,13 @@ class Blob {
     jump() { // this resets x velocity (should not reset)
         if (!this.onGround) return;
         
-        Matter.Body.setVelocity(this.body, {x:0, y:-this.jumpSpeed});
+        Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpSpeed});
         this.onGround = false;
     }
 
     jumpShort() { //also resets x velocity
         if (this.body.velocity.y < -this.jumpShortSpeed) {
-            Matter.Body.setVelocity(this.body, {x:0, y:-this.jumpShortSpeed});
+            Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpShortSpeed});
         }       
     }
 }
