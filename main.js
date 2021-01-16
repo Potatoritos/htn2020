@@ -49,7 +49,7 @@ class Game {
 
         this.blob = new Blob();
         var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {isStatic:true, label:'ground'});
-		var wall = Matter.Bodies.rectangle(1400, 900, 10, 4000, {isStatic:true, label:'ground'});
+		var wall = Matter.Bodies.rectangle(1500, 900, 10, 4000, {isStatic:true, label:'wall'});
 
         Matter.World.add(this.engine.world, [this.blob.body, ground, wall]);
 
