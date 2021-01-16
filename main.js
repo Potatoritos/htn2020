@@ -20,6 +20,7 @@ class Blob {
 
         this.isMovingLeft = false;
         this.isMovingRight = false;
+        this.isHoldingJump = false;
         
         this.isOnGround = false;
     }
@@ -27,6 +28,7 @@ class Blob {
     startMoveLeft() { 
         if (this.isMovingRight) this.stopMoveRight();
         this.isMovingLeft = true;
+        this.body.render.sprite.texture = 'img/blob.png';
     }
     doMoveLeft() {
         Matter.Body.setVelocity(this.body, {x:-this.moveSpeed, y:this.body.velocity.y});
@@ -38,12 +40,21 @@ class Blob {
     startMoveRight() { // same here
         if (this.isMovingLeft) this.stopMoveLeft();
         this.isMovingRight = true;
+        this.body.render.sprite.texture = 'img/blobflipped.png';
     }
     doMoveRight() {
         Matter.Body.setVelocity(this.body, {x:this.moveSpeed, y:this.body.velocity.y});
     }
     stopMoveRight() {
         this.isMovingRight = false;
+    }
+
+    holdJump() {
+        this.isHoldingJump = true;
+    }
+    unHoldJump() {
+        this.isHoldingJump = false;
+        this.jumpShort();
     }
 
     jump() { // this resets x velocity (should not reset)
@@ -95,10 +106,10 @@ class Game {
             },
             38: { // up
                 up: () => {
-                    this.blob.jump();
+                    this.blob.holdJump();
                 },
                 down: () => {
-                    this.blob.jumpShort();
+                    this.blob.unHoldJump();
                 }
             },
             39: { // right
@@ -157,6 +168,9 @@ class Game {
         }
         if (this.blob.isMovingRight) {
             this.blob.doMoveRight();
+        }
+        if (this.blob.isHoldingJump) {
+            this.blob.jump();
         }
     }
 
