@@ -24,6 +24,14 @@ class Blob {
         this.isFrozen = false;
         
         this.isOnGround = false;
+
+        this.touchWall = {
+            start : false,
+            x:0,
+            y:0,
+            keys:[false,false,false,false],
+            timer : 0 //in frames
+        };
     }
 
     startMoveLeft() { 
@@ -170,10 +178,53 @@ class Game {
             ) {
                 this.blob.isOnGround = true;
             }
+
+            if (
+                (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'wall') ||
+                (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'wall')
+            ) {
+                this.blob.touchWall.keys[0] = this.keys[38] //wasd its actually ijkl but this is easier to undrestand
+                this.blob.touchWall.keys[1] = this.keys[37] //wasd
+                this.blob.touchWall.keys[2] = this.keys[40] //wasd
+                this.blob.touchWall.keys[3] = this.keys[39] //wasd
+                this.blob.touchWall.start = true;
+            }
         });
     }
 
     loop() {
+
+        if (this.blob.touchWall.start) {
+            this.blob.isFrozen=true
+            console.log(this.blob.touchWall.timer)
+            this.blob.touchWall.timer++
+
+            if (this.keys[74]!=true && this.blob.touchWall.keys[1]){
+                this.blob.touchWall.x = -1
+            }
+            if (this.keys[73]!=true && this.blob.touchWall.keys[0]){
+                this.blob.touchWall.y = 1
+            }
+            if (this.keys[75]!=true && this.blob.touchWall.keys[2]){
+                this.blob.touchWall.y = -1
+            }
+            if (this.keys[76]!=true && this.blob.touchWall.keys[3]){
+                this.blob.touchWall.x = 1
+            }
+
+            this.blob.touchWall.keys[0] = this.keys[38] //wasd its actually ijkl but this is easier to undrestand
+            this.blob.touchWall.keys[1] = this.keys[37] //wasd
+            this.blob.touchWall.keys[2] = this.keys[40] //wasd
+            this.blob.touchWall.keys[3] = this.keys[39] //wasd
+
+            if (this.blob.touchWall.timer == 31){
+                this.blob.isFrozen=false
+                //console.log(this.blob.touchWall.keys)
+                console.log(this.blob.touchWall.x)
+                console.log(this.blob.touchWall.x)
+            }
+        }
+
         if (this.blob.isMovingLeft) {
             this.blob.doMoveLeft();
         }
