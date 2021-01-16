@@ -2,11 +2,12 @@ class Blob {
     constructor() {
         this.body = Matter.Bodies.rectangle(400, 0, 50, 50, {
             mass: 100,
-            label: 'blob'
+            label: 'blob',
+            inertia: 99999999999 // disable rotation
         });
-        this.jumpSpeed = 10;
+        this.jumpSpeed = 8;
         this.jumpShortSpeed = 4;
-        this.moveSpeed = 8;
+        this.moveSpeed = 6;
         
         this.onGround = false;
     }
