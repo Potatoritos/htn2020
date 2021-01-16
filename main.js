@@ -34,6 +34,13 @@ class Blob {
         };
     }
 
+    fixInPlace() {
+        this.body.isStatic = true;
+    }
+    unFixInPlace() {
+        this.body.isStatic = false;
+    }
+
     startMoveLeft() { 
         if (this.isMovingRight) this.stopMoveRight();
         this.isMovingLeft = true;
