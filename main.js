@@ -4,14 +4,32 @@ class Blob {
             mass: 100,
             label: 'blob'
         });
+        this.jumpSpeed = 10;
+        this.jumpShortSpeed = 4;
+        this.moveSpeed = 8;
+        
         this.onGround = false;
     }
 
-    jump() {
+    moveLeft() { // this causes lag (and resets y vel...)
+        Matter.Body.setVelocity(this.body, {x:-this.moveSpeed, y:0});
+    }
+
+    moveRight() { // same here
+        Matter.Body.setVelocity(this.body, {x:this.moveSpeed, y:0});
+    }
+
+    jump() { // this resets x velocity (should not reset)
         if (!this.onGround) return;
-        //Matter.Body.applyForce(this.body, this.body.position, {x:0, y:-2});
-        Matter.Body.setVelocity(this.body, {x:0, y:-8});
+        
+        Matter.Body.setVelocity(this.body, {x:0, y:-this.jumpSpeed});
         this.onGround = false;
+    }
+
+    jumpShort() { //also resets x velocity
+        if (this.body.velocity.y < -this.jumpShortSpeed) {
+            Matter.Body.setVelocity(this.body, {x:0, y:-this.jumpShortSpeed});
+        }       
     }
 }
 
@@ -22,8 +40,8 @@ class Game {
             element: document.body,
             engine: this.engine,
             options: {
-                width: document.body.clientWidth,
-                height: document.body.clientHeight,
+                width: 800,
+                height: 600,
                 wireframes: false
             }
         });
@@ -47,7 +65,9 @@ class Game {
                 up: () => {
                     this.blob.jump();
                 },
-                down: () => {}
+                down: () => {
+                    this.blob.jumpShort();
+                }
             },
             39: { // right
                 up: () => {},
@@ -66,6 +86,7 @@ class Game {
         var t = this;
         document.addEventListener('keydown', e => {t.handleKeyDown(e)}, false);
         document.addEventListener('keyup', e => {t.handleKeyUp(e)}, false);
+        setInterval(function() {t.loop()}, 16.666666);
 
         Matter.Events.on(this.engine, 'collisionStart', e => {
             var pairs = e.pairs[0];
@@ -73,6 +94,15 @@ class Game {
                 this.blob.onGround = true;
             }
         });
+    }
+
+    loop() {
+        if (this.keys[37]) {
+            this.blob.moveLeft();
+        }
+        if (this.keys[39]) {
+            this.blob.moveRight();
+        }
     }
 
     handleKeyDown(e) {
@@ -90,7 +120,7 @@ class Game {
         this.keys[e.keyCode] = false;
         
         if (e.keyCode in this.keyFuncs) {
-            this.keyFuncs[e.keyCode].up();
+            this.keyFuncs[e.keyCode].down();
         }
     }
 }
