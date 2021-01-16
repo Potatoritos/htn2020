@@ -1,9 +1,18 @@
 class Blob {
     constructor() {
+        var blobimg = document.getElementById("blobimg");
         this.body = Matter.Bodies.rectangle(400, 0, 50, 50, {
             mass: 100,
             label: 'blob',
-            inertia: 99999999999 // disable rotation
+            inertia: 99999999999, // disable rotation
+            render: {
+                sprite: {
+                    texture: 'img/blob.png',
+                    xScale: 0.7,
+                    yScale: 0.7,
+                    yOffset: -0.1
+                }
+            }
         });
         this.jumpSpeed = 8;
         this.jumpShortSpeed = 4;
@@ -49,9 +58,9 @@ class Game {
 
         this.blob = new Blob();
         var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {isStatic:true, label:'ground'});
-		var wall = Matter.Bodies.rectangle(1500, 900, 10, 4000, {isStatic:true, label:'wall'});
+		var wall = Matter.Bodies.rectangle(0, 900, 10, 4000, {isStatic:true, label:'wall'});
 
-        Matter.World.add(this.engine.world, [this.blob.body, ground, wall]);
+        Matter.World.add(this.engine.world, [ground, wall, this.blob.body]);
 
         Matter.Engine.run(this.engine);
         Matter.Render.run(this.render);
@@ -81,6 +90,22 @@ class Game {
             },
             68: { // d
                 up: () => {},
+                down: () => {}
+            },
+            90: { // z, debug
+                up: () => {
+                    this.blob.body.render.sprite.yScale += 0.1;
+                    this.blob.body.render.sprite.xScale -= 0.1;
+                    this.blob.body.render.sprite.yOffset += 0.1;
+                },
+                down: () => {}
+            },
+            88: { // x, debug
+                up: () => {
+                    this.blob.body.render.sprite.yScale -= 0.1;
+                    this.blob.body.render.sprite.xScale += 0.1;
+                    this.blob.body.render.sprite.yOffset -= 0.1;
+                },
                 down: () => {}
             }
         };
