@@ -40,8 +40,8 @@ class Game {
             element: document.body,
             engine: this.engine,
             options: {
-                width: 800,
-                height: 600,
+                width: document.body.clientWidth,
+                height: document.body.clientHeight,
                 wireframes: false
             }
         });
