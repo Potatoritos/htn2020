@@ -17,23 +17,40 @@ class Blob {
         this.jumpSpeed = 8;
         this.jumpShortSpeed = 4;
         this.moveSpeed = 6;
+
+        this.isMovingLeft = false;
+        this.isMovingRight = false;
         
-        this.onGround = false;
+        this.isOnGround = false;
     }
 
-    moveLeft() { // this causes lag (and resets y vel...)
+    startMoveLeft() { 
+        if (this.isMovingRight) this.stopMoveRight();
+        this.isMovingLeft = true;
+    }
+    doMoveLeft() {
         Matter.Body.setVelocity(this.body, {x:-this.moveSpeed, y:this.body.velocity.y});
     }
+    stopMoveLeft() {
+        this.isMovingLeft = false;
+    }
 
-    moveRight() { // same here
+    startMoveRight() { // same here
+        if (this.isMovingLeft) this.stopMoveLeft();
+        this.isMovingRight = true;
+    }
+    doMoveRight() {
         Matter.Body.setVelocity(this.body, {x:this.moveSpeed, y:this.body.velocity.y});
+    }
+    stopMoveRight() {
+        this.isMovingRight = false;
     }
 
     jump() { // this resets x velocity (should not reset)
-        if (!this.onGround) return;
+        if (!this.isOnGround) return;
         
         Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpSpeed});
-        this.onGround = false;
+        this.isOnGround = false;
     }
 
     jumpShort() { //also resets x velocity
@@ -69,8 +86,12 @@ class Game {
 
         this.keyFuncs = {
             37: { //left
-                up: () => {},
-                down: () => {}
+                up: () => {
+                    this.blob.startMoveLeft();
+                },
+                down: () => {
+                    this.blob.stopMoveLeft();
+                }
             },
             38: { // up
                 up: () => {
@@ -81,8 +102,12 @@ class Game {
                 }
             },
             39: { // right
-                up: () => {},
-                down: () => {}
+                up: () => {
+                    this.blob.startMoveRight();
+                },
+                down: () => {
+                    this.blob.stopMoveRight();
+                }
             },
             40: { //down
                 up: () => {},
@@ -117,18 +142,21 @@ class Game {
 
         Matter.Events.on(this.engine, 'collisionStart', e => {
             var pairs = e.pairs[0];
-            if (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'ground') {
-                this.blob.onGround = true;
+            if (
+                (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'ground') ||
+                (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'ground')
+            ) {
+                this.blob.isOnGround = true;
             }
         });
     }
 
     loop() {
-        if (this.keys[37]) {
-            this.blob.moveLeft();
+        if (this.blob.isMovingLeft) {
+            this.blob.doMoveLeft();
         }
-        if (this.keys[39]) {
-            this.blob.moveRight();
+        if (this.blob.isMovingRight) {
+            this.blob.doMoveRight();
         }
     }
 
