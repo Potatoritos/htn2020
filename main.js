@@ -51,8 +51,10 @@ class Blob {
         this.isMovingLeft = false;
         this.isMovingRight = false;
         this.isHoldingJump = false;
+		this.isHoldingDash = false;
         this.isMovingUp = false;
 		this.isBounce = false;
+		this.usedDash = false;
 		this.isShortBounce =false;
         this.isMovingDown = false;
 
@@ -83,12 +85,17 @@ class Blob {
     }
     doMoveLeft() {
         if (this.isFrozen) return;
-        Matter.Body.setVelocity(this.body, {x:-this.moveSpeed, y:this.body.velocity.y});
+        Matter.Body.setVelocity(this.body, {x:Math.min(this.body.velocity.x, -this.moveSpeed), y:this.body.velocity.y});
     }
     stopMoveLeft() {
         this.isMovingLeft = false;
     }
-
+	startMoveDash() { 
+        this.isHoldingDash = true;
+    }
+	stopMoveDash() {
+        this.isHoldingDash = false;
+    }
     startMoveRight() { // same here
         if (this.isMovingLeft) this.stopMoveLeft();
         this.isMovingRight = true;
@@ -96,7 +103,7 @@ class Blob {
     }
     doMoveRight() {
         if (this.isFrozen) return;
-        Matter.Body.setVelocity(this.body, {x:this.moveSpeed, y:this.body.velocity.y});
+        Matter.Body.setVelocity(this.body, {x:Math.max(this.moveSpeed+0.0, this.body.velocity.x), y:this.body.velocity.y});
     }
     stopMoveRight() {
         this.isMovingRight = false;
@@ -228,8 +235,12 @@ class Game {
 				}
             },
             68: { // d
-                up: () => {},
-                down: () => {}
+                up: () => {
+					this.blob.startMoveDash();
+				},
+                down: () => {
+					this.blob.stopMoveDash();
+				}
             },
             90: { // z, debug
                 up: () => {
@@ -272,7 +283,8 @@ class Game {
 				this.bob = 0;
 				
             }
-			this.blob.isBounce = true;;
+			this.blob.isBounce = true;
+			this.blob.usedDash = false;
             if (
                 (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'wall') ||
                 (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'wall')
@@ -372,6 +384,11 @@ class Game {
 			this.blob.bounce();
             this.blob.jump();
         }
+		if(this.blob.isHoldingDash){
+			if(!this.blob.usedDash || this.blob.onGround)
+				Matter.Body.setVelocity(this.blob.body, {x:2.5*this.blob.body.velocity.x, y:2*this.blob.body.velocity.y});
+			this.blob.usedDash = true;
+		}
     }
 
     handleKeyDown(e) {
