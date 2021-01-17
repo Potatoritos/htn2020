@@ -14,8 +14,12 @@ function getHCompScale(duration, frame) {
     return Math.min(BLOB_DEFAULT_SCALE, 0.00092*Math.pow(30/duration, 2)*Math.pow(frame - duration/2, 2) + 0.5);
 }
 
-function getYUCompOffset(scale) {
+function getYTCompOffset(scale) {
     return (BLOB_DEFAULT_SCALE-scale)*BLOB_HEIGHT * 1/BLOB_HEIGHT + 0.4;
+}
+
+function getYBCompOffset(scale) {
+    return (scale-BLOB_DEFAULT_SCALE)*BLOB_HEIGHT * 1/BLOB_HEIGHT + 0.4;
 }
 
 function getVCompScale(duration, frame) {
@@ -207,7 +211,7 @@ class Game {
             67: { // c, debug
                 up: () => {
                     //this.blob.startMoveUp();
-                    this.blob.body.render.sprite.yOffset = getYUCompOffset(this.blob.body.render.sprite.yScale);
+                    this.blob.body.render.sprite.yOffset = getYBCompOffset(this.blob.body.render.sprite.yScale);
                 },
                 down: () => {
                     //this.blob.stopMoveUp();
@@ -288,12 +292,12 @@ class Game {
         if (this.bob == 0) this.bob++;
 
         var yScale = getHCompScale(40, this.bob);
-        var yOffset = getYUCompOffset(yScale);
+        var yOffset = getYBCompOffset(yScale);
 
         var xScale = getVCompScale(40, this.bob);
 
         this.blob.body.render.sprite.yScale = yScale;
-        this.blob.body.render.sprite.yOffset = -yOffset;
+        this.blob.body.render.sprite.yOffset = yOffset;
 
         this.blob.body.render.sprite.xScale = xScale;
 
