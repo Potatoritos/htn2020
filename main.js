@@ -10,6 +10,10 @@ const BLOB_HEIGHT = 98;
 const BLOB_WIDTH = 80
 const BLOB_DEFAULT_SCALE = 0.7
 
+var gameOver = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'gameOver', render:{fillStyle:'red'}});
+gameOver.render.sprite.texture = "img/gameover.png";
+
+
 function getCompScale(duration, frame, scaleTo) {
     // duration is how many frames the animation has
     // frame is the current frame of the animation
@@ -58,6 +62,7 @@ class Blob {
 		this.isHoldingDash = false;
         this.isMovingUp = false;
 		this.isBounce = false;
+		this.isLost = false;
 		this.usedDash = false;
 		this.isShortBounce =false;
         this.isMovingDown = false;
@@ -103,6 +108,7 @@ class Blob {
     }
 
     startMoveLeft() { 
+		if(this.isLost) return;
         if (this.isMovingRight) this.stopMoveRight();
         this.isMovingLeft = true;
         this.body.render.sprite.texture = 'img/blob.png';
@@ -121,6 +127,7 @@ class Blob {
         this.isHoldingDash = false;
     }
     startMoveRight() { // same here
+		if(this.isLost) return;
         if (this.isMovingLeft) this.stopMoveLeft();
         this.isMovingRight = true;
         this.body.render.sprite.texture = 'img/blobflipped.png';
@@ -211,10 +218,8 @@ class Game {
 		wall.restitution = 1.7;
 		
 		var dieBlock = Matter.Bodies.rectangle(450, 540, 30, 80, {isStatic:true, label:'die', render:{fillStyle:'red'}});
-		var gameOver = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'gameOver', render:{fillStyle:'red'}});
-		gameOver.render.sprite.texture = "img/gameover.png";
 		
-        Matter.World.add(this.engine.world, [ground, wall, this.blob.body, dieBlock, gameOver]);
+        Matter.World.add(this.engine.world, [ground, wall, this.blob.body, dieBlock]);
 
         Matter.Engine.run(this.engine);
         Matter.Render.run(this.render);
@@ -315,6 +320,12 @@ class Game {
 				//this.bob = 0;
 				
             }
+			if(pairs.bodyA.label ==="die" || pairs.bodyB.label === "die"){
+				Matter.World.add(this.engine.world, [gameOver]);
+				this.blob.isFrozen = true;
+				this.blob.body.render.sprite.texture = "img/sadblob.png";
+				this.blob.isLost = true;
+			}	
 			this.blob.isBounce = true;
 			this.blob.usedDash = false;
             if (
