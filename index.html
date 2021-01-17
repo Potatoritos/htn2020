@@ -101,12 +101,15 @@
     </style>
     <body>
         <!--<canvas id="display" width="800" height="600" style="border:1px solid black"></canvas>-->
-		<!--<div style="float:right; color:white;">-->
-		<!--<h3>Timer</h3>-->
-		<!--<h1 id="timer"></h1>-->
-		<!--</div>-->
+		<div style="float:right; color:black;">
+		<h3>Timer</h3>
+		<h1 id="timer"></h1>
+		</div>
+		
         <div id="windiv" class="center">
             <h1 id="wintext">Level complete!</h1>
+			<h3 style="margin: 0">Finished in:</h3>
+			<h3 style="margin: 0">a</h3>
         </div>
         <div id="losediv" class="center">
             <h1 id="losetext">Level failed!</h1>
@@ -131,7 +134,25 @@
 				$("#infodiv").hide();
 			}
 		);
+		$(document).keypress(function(){
+						$("#infodiv").hide();
+
+		});
 		
+		window.timer = false;
+		var now = new Date().getTime();
+		
+		function formatTime(ms) {
+		  var format = "mm:ss:SS";
+		  if (ms > 3600000) {
+			format = "HH:mm:ss:SS";
+		  }
+		  return moment().startOf('day').add(ms, 'milliseconds').format(format);
+		}
+		setInterval(function(){
+			if(!window.timer)
+			document.getElementById("timer").innerHTML = formatTime(new Date().getTime()-now);
+		}, 1);
 
         </script>
     </body>
