@@ -10,25 +10,29 @@ const BLOB_HEIGHT = 98;
 const BLOB_WIDTH = 80
 const BLOB_DEFAULT_SCALE = 0.7
 
-function getHCompScale(duration, frame) {
-    return Math.min(BLOB_DEFAULT_SCALE, 0.00092*Math.pow(30/duration, 2)*Math.pow(frame - duration/2, 2) + 0.5);
+function getCompScale(duration, frame, scaleTo) {
+    // duration is how many frames the animation has
+    // frame is the current frame of the animation
+    // minScale is in the range [0,1] (lower means more intense)
+    var h = duration/2;
+    return ((BLOB_DEFAULT_SCALE-scaleTo)/(h*h)) * (frame-h)*(frame-h) + scaleTo;
 }
 
 function getYTCompOffset(scale) {
-    return (BLOB_DEFAULT_SCALE-scale)*BLOB_HEIGHT * 1/BLOB_HEIGHT + 0.4;
+    // note: broken (but unnoticeable if scale > 0.4)
+    return (BLOB_DEFAULT_SCALE-scale)*BLOB_HEIGHT * 1/(BLOB_HEIGHT) + 0.4;
 }
 
 function getYBCompOffset(scale) {
+    // note: broken (but unnoticeable if scale > 0.4)
     return (scale-BLOB_DEFAULT_SCALE)*BLOB_HEIGHT * 1/BLOB_HEIGHT + 0.4;
-}
 
-function getVCompScale(duration, frame) {
-    return scale = Math.max(BLOB_DEFAULT_SCALE, -0.0007*Math.pow(30/duration, 2)*Math.pow(frame - duration/2, 2) + 0.85);
 }
 
 function getXCompOffset(scale) { // does not work i think
     return (BLOB_DEFAULT_SCALE-scale)*BLOB_WIDTH * 1/BLOB_WIDTH;
 }
+
 class Blob {
     constructor() {
         this.body = Matter.Bodies.rectangle(400, 0, 50, 50, {
@@ -69,6 +73,26 @@ class Blob {
             keys:[false,false,false,false],
             timer : 0 //in frames
         };
+
+        this.aXDuration = 0;
+        this.aXFrame = 0;
+        this.aXScale = 0;
+
+        this.aYDuration = 120;
+        this.aYFrame = 1;
+        this.aYScale = 0.2;
+    }
+
+    playAnimation(aXDuration, aXScale, aYDuration, aYScale) {
+        this.aXDuration = aXDuration;
+        this.aXFrame = 1;
+        this.aXScale = aXScale;
+        this.aYDuration = aYDuration;
+        this.aYFrame = 1;
+        this.aYScale = aYScale;
+    }
+    checkIfAnimationActive() {
+        return this.aXFrame < this.aXDuration || this.aYFrame < this.aYDuration;
     }
 
     fixInPlace() {
@@ -155,16 +179,16 @@ class Blob {
             Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpShortSpeed});
         }       
     }
-	bounce(){
-		for(var i = 0; i < 300 && this.body.render.sprite.yScale < 0.70; i++){
-			setTimeout(function(blobbody){
-				blobbody.render.sprite.yScale += 0.0001;
+	//bounce(){ //outdated
+		//for(var i = 0; i < 300 && this.body.render.sprite.yScale < 0.70; i++){
+			//setTimeout(function(blobbody){
+				//blobbody.render.sprite.yScale += 0.0001;
 				
-				blobbody.render.sprite.xScale -= 0.0001;
-				blobbody.render.sprite.yOffset += 0.0001;
-			}, i, this.body);
-		}
-	}
+				//blobbody.render.sprite.xScale -= 0.0001;
+				//blobbody.render.sprite.yOffset += 0.0001;
+			//}, i, this.body);
+		//}
+	//}
 		
 }
 
@@ -268,7 +292,8 @@ class Game {
 			}
         };
         
-        var t = this; this.bob = 0;
+        var t = this; 
+        //this.bob = 0;
         document.addEventListener('keydown', e => {t.handleKeyDown(e)}, false);
         document.addEventListener('keyup', e => {t.handleKeyUp(e)}, false);
         setInterval(function() {t.loop()}, 16.666666);
@@ -279,8 +304,11 @@ class Game {
                 (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'ground') ||
                 (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'ground')
             ) {
-                this.blob.isOnGround = true;
-				this.bob = 0;
+                if (!this.blob.isOnGround) {
+                    this.blob.isOnGround = true;
+                    this.blob.playAnimation(25, 0.85, 25, 0.4);
+                }
+				//this.bob = 0;
 				
             }
 			this.blob.isBounce = true;
@@ -299,69 +327,93 @@ class Game {
     }
 
     loop() {
-		if(this.blob.isBounce){
-			this.bob++;
-			//this.bob %= 41;
-			if (this.bob == 21) this.blob.isBounce = false;
-			
-			var duration = this.blob.isShortBounce ? 5: 20;
-			
-			var yScale = getHCompScale(20, this.bob);
-			var yOffset = getYBCompOffset(yScale);
-
-			var xScale = getVCompScale(20, this.bob);
-
-			this.blob.body.render.sprite.yScale = yScale;
-			this.blob.body.render.sprite.yOffset = yOffset;
-
-			this.blob.body.render.sprite.xScale = xScale;
-		}
-        if (this.blob.touchWall.start && false) {
-            this.blob.fixInPlace()
-            console.log(this.blob.touchWall.timer)
-            this.blob.touchWall.timer++
-
-            if (this.keys[37]!=true && this.blob.touchWall.keys[1]){
-                this.blob.touchWall.x = -1
-            }
-            if (this.keys[38]!=true && this.blob.touchWall.keys[0]){
-                this.blob.touchWall.y = 1
-            }
-            if (this.keys[40]!=true && this.blob.touchWall.keys[2]){
-                this.blob.touchWall.y = -1
-            }
-            if (this.keys[39]!=true && this.blob.touchWall.keys[3]){
-                this.blob.touchWall.x = 1
-            }
-
-            this.blob.touchWall.keys[0] = this.keys[38] //wasd its actually ijkl but this is easier to undrestand
-            this.blob.touchWall.keys[1] = this.keys[37] //wasd
-            this.blob.touchWall.keys[2] = this.keys[40] //wasd
-            this.blob.touchWall.keys[3] = this.keys[39] //wasd
-
-            if (this.blob.touchWall.timer == 31){
-                this.blob.unFixInPlace()
-                this.blob.touchWall.timer = 0
-                this.blob.touchWall.start = false
-                console.log(this.blob.touchWall.x)
-                if (this.blob.touchWall.x==1){
-                    this.blob.startMoveRight();
-                }
-                if (this.blob.touchWall.x==-1){
-                    this.blob.startMoveLeft();
-                }
-                if (this.blob.touchWall.y==1){
-                    this.blob.doMoveUp()
-                }
-                if (this.blob.touchWall.y==-1){
-                    this.blob.doMoveDown()
-                }
-
-                //console.log(this.blob.touchWall.keys)
-                //console.log(this.blob.touchWall.x)
-                //console.log(this.blob.touchWall.y)
+        // Start walking animation if walking
+        if (this.blob.isOnGround && (this.blob.isMovingLeft || this.blob.isMovingRight)) {
+            console.log('yes');
+            if (!this.blob.checkIfAnimationActive()) {
+                console.log('sefsd');
+                this.blob.playAnimation(40, 0.75, 40, 0.6);
             }
         }
+
+        // Play animations
+        if (this.blob.aYFrame < this.blob.aYDuration) {
+            var scale = getCompScale(this.blob.aYDuration, this.blob.aYFrame, this.blob.aYScale);
+            this.blob.body.render.sprite.yScale = scale;
+            this.blob.body.render.sprite.yOffset = getYBCompOffset(scale);
+            this.blob.aYFrame++;
+        }
+        if (this.blob.aXFrame < this.blob.aXDuration) {
+            this.blob.aXFrame++;
+            var scale = getCompScale(this.blob.aXDuration, this.blob.aXFrame, this.blob.aXScale);
+            this.blob.body.render.sprite.xScale = scale;
+            //this.blob.body.render.sprite.xOffset = getXBCompOffset(scale); //TODO: implement
+        }
+
+		//if(this.blob.isBounce){
+			//this.bob++;
+			//this.bob %= 41;
+			//if (this.bob == 21) this.blob.isBounce = false;
+			
+			//var duration = this.blob.isShortBounce ? 5: 20;
+			
+			//var yScale = getHCompScale(20, this.bob);
+			//var yOffset = getYBCompOffset(yScale);
+
+			//var xScale = getVCompScale(20, this.bob);
+
+			//this.blob.body.render.sprite.yScale = yScale;
+			//this.blob.body.render.sprite.yOffset = yOffset;
+
+			//this.blob.body.render.sprite.xScale = xScale;
+		//}
+
+        //if (this.blob.touchWall.start && false) {
+            //this.blob.fixInPlace()
+            //console.log(this.blob.touchWall.timer)
+            //this.blob.touchWall.timer++
+
+            //if (this.keys[37]!=true && this.blob.touchWall.keys[1]){
+                //this.blob.touchWall.x = -1
+            //}
+            //if (this.keys[38]!=true && this.blob.touchWall.keys[0]){
+                //this.blob.touchWall.y = 1
+            //}
+            //if (this.keys[40]!=true && this.blob.touchWall.keys[2]){
+                //this.blob.touchWall.y = -1
+            //}
+            //if (this.keys[39]!=true && this.blob.touchWall.keys[3]){
+                //this.blob.touchWall.x = 1
+            //}
+
+            //this.blob.touchWall.keys[0] = this.keys[38] //wasd its actually ijkl but this is easier to undrestand
+            //this.blob.touchWall.keys[1] = this.keys[37] //wasd
+            //this.blob.touchWall.keys[2] = this.keys[40] //wasd
+            //this.blob.touchWall.keys[3] = this.keys[39] //wasd
+
+            //if (this.blob.touchWall.timer == 31){
+                //this.blob.unFixInPlace()
+                //this.blob.touchWall.timer = 0
+                //this.blob.touchWall.start = false
+                //console.log(this.blob.touchWall.x)
+                //if (this.blob.touchWall.x==1){
+                    //this.blob.startMoveRight();
+                //}
+                //if (this.blob.touchWall.x==-1){
+                    //this.blob.startMoveLeft();
+                //}
+                //if (this.blob.touchWall.y==1){
+                    //this.blob.doMoveUp()
+                //}
+                //if (this.blob.touchWall.y==-1){
+                    //this.blob.doMoveDown()
+                //}
+
+                ////console.log(this.blob.touchWall.keys)
+                ////console.log(this.blob.touchWall.x)
+                ////console.log(this.blob.touchWall.y)
+            //}
+        //}
 
         if (this.blob.isMovingLeft) {
             this.blob.doMoveLeft();
@@ -381,7 +433,7 @@ class Game {
 		}
 
 		if (this.blob.isHoldingJump) {
-			this.blob.bounce();
+			//this.blob.bounce();
             this.blob.jump();
         }
 		if(this.blob.isHoldingDash){
