@@ -152,6 +152,34 @@ const LEVELS = {
             [BLOCKS.wall, 0, 800, 10, 4000],
             [BLOCKS.wall, 1200, 800, 10, 4000],
         ]
+    },
+    6: {
+        spawnpoint: [700, 0],
+        blocks: [
+            //[BLOCKS.win, -10, 785, 700, 30],
+            
+            //[BLOCKS.ground, 1200, 600, 300, 20],
+            
+            //[BLOCKS.ground, 900, 350, 150, 20],
+            
+            //[BLOCKS.ground, 0, 350, 350, 20],
+            
+            //[BLOCKS.ground, 400, 460, 10, 300],
+            
+            //[BLOCKS.ground, 0, 350, 350, 20],
+            
+            //[BLOCKS.ground, 0, 500, 2400, 20],
+
+            //[BLOCKS.win, 800, 300, 200, 20],
+            
+            [BLOCKS.death, 900, 500, 1200, 20],
+            [BLOCKS.win, 0, 800, 2400, 20],
+            [BLOCKS.death, 0, 500, 300, 20],
+            [BLOCKS.death, 0, 700, 1200, 20],
+            [BLOCKS.death, 1400, 700, 1200, 20],
+            [BLOCKS.wall, 0, 800, 10, 4000],
+            [BLOCKS.wall, 1200, 800, 10, 4000],
+        ]
     }
 };
 
