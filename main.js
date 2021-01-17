@@ -10,14 +10,6 @@ const BLOB_HEIGHT = 98;
 const BLOB_WIDTH = 80
 const BLOB_DEFAULT_SCALE = 0.7
 
-var gameOver = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'gameOver', render:{fillStyle:'red'}});
-gameOver.render.sprite.texture = "img/gameover.png";
-
-
-var winGame = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'winGame', render:{fillStyle:'red'}});
-winGame.render.sprite.texture = "img/youwon.png";
-
-
 function getCompScale(duration, frame, scaleTo) {
     // duration is how many frames the animation has
     // frame is the current frame of the animation
@@ -58,6 +50,7 @@ class Blob {
         });
         this.jumpSpeed = 9;
         this.jumpShortSpeed = 4;
+        this.jumpLargeSpeed = 15;
         this.moveSpeed = 5;
 
         this.isMovingLeft = false;
@@ -66,14 +59,19 @@ class Blob {
 		this.isHoldingDash = false;
         this.isMovingUp = false;
 		this.isBounce = false;
-		this.isLost = false;
 		this.usedDash = false;
 		this.isShortBounce =false;
         this.isMovingDown = false;
 
         this.isFrozen = false;
+
+        this.isChargingJump = false;
+        this.chargingJumpSpeed = 0;
         
         this.isOnGround = false;
+        this.isOnWall = false;
+
+        this.boostTimer = -1;
 
         this.touchWall = {
             start : false,
@@ -87,9 +85,9 @@ class Blob {
         this.aXFrame = 0;
         this.aXScale = 0;
 
-        this.aYDuration = 120;
-        this.aYFrame = 1;
-        this.aYScale = 0.2;
+        this.aYDuration = 0;
+        this.aYFrame = 0;
+        this.aYScale = 0;
     }
 
     playAnimation(aXDuration, aXScale, aYDuration, aYScale) {
@@ -112,7 +110,6 @@ class Blob {
     }
 
     startMoveLeft() { 
-		if(this.isLost) return;
         if (this.isMovingRight) this.stopMoveRight();
         this.isMovingLeft = true;
         this.body.render.sprite.texture = 'img/blob.png';
@@ -131,7 +128,6 @@ class Blob {
         this.isHoldingDash = false;
     }
     startMoveRight() { // same here
-		if(this.isLost) return;
         if (this.isMovingLeft) this.stopMoveLeft();
         this.isMovingRight = true;
         this.body.render.sprite.texture = 'img/blobflipped.png';
@@ -178,11 +174,19 @@ class Blob {
         this.jumpShort();
     }
 
-    jump() { // this resets x velocity (should not reset)
+    jump() {
         if (!this.isOnGround || this.isFrozen) return;
         
         Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpSpeed});
-        this.isOnGround = false;
+        //this.isOnGround = false;
+    }
+
+    jumpLarge() {
+        if (!this.isOnGround || this.isFrozen || !this.isChargingJump) return;
+
+        Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.chargingJumpSpeed});
+        this.isChargingJump = false;
+        this.chargingJumpSpeed = 0;
     }
 
     jumpShort() { //also resets x velocity
@@ -219,12 +223,9 @@ class Game {
         this.blob = new Blob();
         var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {isStatic:true, label:'ground'});
 		var wall = Matter.Bodies.rectangle(0, 900, 10, 4000, {isStatic:true, label:'wall'});
-		wall.restitution = 1.7;
+		//wall.restitution = 1.7;
 		
-		var dieBlock = Matter.Bodies.rectangle(450, 540, 30, 80, {isStatic:true, label:'die', render:{fillStyle:'red'}});
-		var winBlock = Matter.Bodies.rectangle(470, 540, 30, 80, {isStatic:true, label:'win', render:{fillStyle:'green'}});
-
-        Matter.World.add(this.engine.world, [ground, wall, this.blob.body, dieBlock, winBlock]);
+        Matter.World.add(this.engine.world, [ground, wall, this.blob.body]);
 
         Matter.Engine.run(this.engine);
         Matter.Render.run(this.render);
@@ -311,7 +312,29 @@ class Game {
         document.addEventListener('keydown', e => {t.handleKeyDown(e)}, false);
         document.addEventListener('keyup', e => {t.handleKeyUp(e)}, false);
         setInterval(function() {t.loop()}, 16.666666);
+
+        Matter.Events.on(this.engine, 'collisionEnd', e => {
+            var pairs = e.pairs[0];
+            if (
+                (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'ground') ||
+                (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'ground')
+            ) {
+                if (this.blob.isOnGround) {
+                    this.blob.isOnGround = false;
+                }
+            }
+            
+            if (
+                (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'wall') ||
+                (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'wall')
+            ) {
+                if (this.blob.isOnWall) {
+                    this.blob.isOnWall = false;
+                }
+            }
+        });
 		
+
         Matter.Events.on(this.engine, 'collisionStart', e => {
             var pairs = e.pairs[0];
             if (
@@ -319,35 +342,41 @@ class Game {
                 (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'ground')
             ) {
                 if (!this.blob.isOnGround) {
-                    this.blob.isOnGround = true;
-                    this.blob.playAnimation(25, 0.85, 25, 0.4);
-                }
-				//this.bob = 0;
-				
-            }
-			if(pairs.bodyA.label ==="die" || pairs.bodyB.label === "die"){
-				Matter.World.add(this.engine.world, [gameOver]);
-				this.blob.isFrozen = true;
-				this.blob.body.render.sprite.texture = "img/sadblob.png";
-				this.blob.isLost = true;
-			}
-			if(pairs.bodyA.label ==="win" || pairs.bodyB.label === "win"){
-				Matter.World.add(this.engine.world, [winGame]);
-				window.timer = true;
-				this.blob.isFrozen = true;
 
-			}
+                    this.blob.isOnGround = true;
+
+                    var intensity = 3/(Math.abs(this.blob.body.velocity.y)+5)+0.3;
+                    console.log(intensity);
+
+                    this.blob.boostTimer = 0;
+                    this.blob.chargingJumpSpeed = this.blob.body.velocity.y;
+
+                    this.blob.playAnimation(25, 0.85, 25, intensity);
+                }
+            }
+
 			this.blob.isBounce = true;
 			this.blob.usedDash = false;
             if (
                 (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'wall') ||
                 (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'wall')
             ) {
-                this.blob.touchWall.keys[0] = this.keys[38] //wasd its actually ijkl but this is easier to undrestand
-                this.blob.touchWall.keys[1] = this.keys[37] //wasd
-                this.blob.touchWall.keys[2] = this.keys[40] //wasd
-                this.blob.touchWall.keys[3] = this.keys[39] //wasd
-                this.blob.touchWall.start = true;
+
+                if (!this.blob.isOnWall) {
+                    this.blob.isOnWall = true;
+
+                    var intensity = 3/(Math.abs(this.blob.body.velocity.x)+5)+0.3;
+                    console.log(intensity);
+
+                    this.blob.playAnimation(25, intensity, 25, 0.85);
+
+                }
+
+                //this.blob.touchWall.keys[0] = this.keys[38] //wasd its actually ijkl but this is easier to undrestand
+                //this.blob.touchWall.keys[1] = this.keys[37] //wasd
+                //this.blob.touchWall.keys[2] = this.keys[40] //wasd
+                //this.blob.touchWall.keys[3] = this.keys[39] //wasd
+                //this.blob.touchWall.start = true;
             }
         });
     }
@@ -355,11 +384,31 @@ class Game {
     loop() {
         // Start walking animation if walking
         if (this.blob.isOnGround && (this.blob.isMovingLeft || this.blob.isMovingRight)) {
-            console.log('yes');
             if (!this.blob.checkIfAnimationActive()) {
-                console.log('sefsd');
                 this.blob.playAnimation(40, 0.75, 40, 0.6);
             }
+        }
+
+        // boost off of ground
+        if (this.blob.boostTimer != -1) {
+            if (!this.blob.isOnGround && !this.blob.isOnWall) {
+                this.blob.boostTimer = -1;
+            } else if (this.blob.isOnGround) {
+                if (this.blob.boostTimer <= 35) {
+                    if (this.blob.isHoldingJump) {
+                        this.blob.isChargingJump = true;
+                        this.blob.jumpLarge();
+                        this.blob.boostTimer = -1;
+                    }
+                }
+            }
+            if (this.blob.boostTimer != -1) {
+                if (this.blob.boostTimer > 35) {
+                    this.blob.boostTimer = -1;
+                } else {
+                    this.blob.boostTimer++;
+                }       
+            }       
         }
 
         // Play animations
