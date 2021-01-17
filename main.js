@@ -1,20 +1,57 @@
 const CONTROLS = {
-    moveLeft: 37,   // left arrow
-    moveRight: 39,  // right arrow
-    moveUp: 38,     // up arrow
-    moveDown: 40,   // down arrow
-    dash: 68        // d
-}
+    moveUp: 73,     // i
+    moveLeft: 74,   // j
+    moveDown: 75,   // k
+    moveRight: 76,  // l
+    dashLeft: 83,   // s
+    dashRight: 70,  // f
+    dashUp: 68      // d
+};
+
+/* 37 left arrow
+ * 39 right arrow
+ * 38 up arrow
+ * 40 down arrow
+ */
+
+const COLOURS = {
+    yellow: '#FCC21C',
+    white: '#EEEEEE',
+    red: '#D33F49',
+    black: '#2C2B2B',
+    blue: '#7180AC',
+    green: '#15B097'
+};
+
+const BLOCKS = {
+    ground: 0,
+    wall: 1,
+    win: 2,
+    boost: 3,
+    death: 4
+};
+
+const LEVELS = {
+    1: [
+        [BLOCKS.ground, 400, 600, 2010, 60],
+        [BLOCKS.wall, 0, 900, 10, 4000],
+        [BLOCKS.wall, 400, -50, 2010, 10],
+        [BLOCKS.ground, 300, 470, 900, 10],
+        [BLOCKS.ground, 1200, 380, 2100, 10],
+        [BLOCKS.death, 450, 300, 30, 80],
+        [BLOCKS.win, 470, 300, 30, 80]
+    ]
+};
 
 const BLOB_HEIGHT = 98;
-const BLOB_WIDTH = 80
-const BLOB_DEFAULT_SCALE = 0.7
+const BLOB_WIDTH = 80;
+const BLOB_DEFAULT_SCALE = 0.7;
 
-var gameOver = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'gameOver', render:{fillStyle:'red'}});	
+var gameOver = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'gameOver', render:{fillStyle:COLOURS.red}});	
 gameOver.render.sprite.texture = "img/gameover.png";	
 
 
-var winGame = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'winGame', render:{fillStyle:'red'}});	
+var winGame = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'winGame', render:{fillStyle:COLOURS.red}});	
 winGame.render.sprite.texture = "img/youwon.png";
 
 function getCompScale(duration, frame, scaleTo) {
@@ -57,24 +94,26 @@ class Blob {
         });
         this.jumpSpeed = 9;
         this.jumpShortSpeed = 4;
-        this.jumpLargeSpeed = 15;
         this.moveSpeed = 5;
+        this.moveDownSpeed = 12;
+        this.dashUpSpeed = 8;
+        this.airMoveRate = 0.5;
 
         this.isMovingLeft = false;
         this.isMovingRight = false;
         this.isHoldingJump = false;
 		this.isHoldingDash = false;
         this.isMovingUp = false;
-		this.isBounce = false;
-		this.usedDash = false;
 		this.isLost = false;
-		this.isShortBounce =false;
         this.isMovingDown = false;
 
         this.isFrozen = false;
 
         this.isChargingJump = false;
         this.chargingJumpSpeed = 0;
+
+        this.usedDownDash = true;
+        this.usedUpDash = true;
         
         this.isOnGround = false;
         this.isOnWall = false;
@@ -125,17 +164,20 @@ class Blob {
     }
     doMoveLeft() {
         if (this.isFrozen) return;
-        Matter.Body.setVelocity(this.body, {x:Math.min(this.body.velocity.x, -this.moveSpeed), y:this.body.velocity.y});
+
+        if (this.isOnGround) {
+            Matter.Body.setVelocity(this.body, {x:-this.moveSpeed,y:this.body.velocity.y});
+        } else {
+            var speed = Math.max(this.body.velocity.x-this.airMoveRate, -this.moveSpeed);
+            if (speed < this.body.velocity.x) {
+                Matter.Body.setVelocity(this.body, {x:speed, y:this.body.velocity.y});
+            }
+        }
     }
     stopMoveLeft() {
         this.isMovingLeft = false;
     }
-	startMoveDash() { 
-        this.isHoldingDash = true;
-    }
-	stopMoveDash() {
-        this.isHoldingDash = false;
-    }
+
     startMoveRight() { // same here
 		if(this.isLost) return;	
         if (this.isMovingLeft) this.stopMoveLeft();
@@ -144,33 +186,28 @@ class Blob {
     }
     doMoveRight() {
         if (this.isFrozen) return;
-        Matter.Body.setVelocity(this.body, {x:Math.max(this.moveSpeed+0.0, this.body.velocity.x), y:this.body.velocity.y});
+        //Matter.Body.setVelocity(this.body, {x:Math.max(this.moveSpeed+0.0, this.body.velocity.x), y:this.body.velocity.y});
+        if (this.isOnGround) {
+            Matter.Body.setVelocity(this.body, {x:this.moveSpeed,y:this.body.velocity.y});
+        } else {
+            var speed = Math.min(this.body.velocity.x+this.airMoveRate, this.moveSpeed);
+            if (speed > this.body.velocity.x) {
+                Matter.Body.setVelocity(this.body, {x:speed, y:this.body.velocity.y});
+            }
+        }
     }
     stopMoveRight() {
         this.isMovingRight = false;
     }
 
-    startMoveUp() { // same here
-        if (this.isMovingDown) this.stopMoveDown();
-        this.isMovingUp = true;
-        //this.body.render.sprite.texture = 'img/blobflipped.png';
-    }
-    doMoveUp() {
-        if (this.isFrozen) return;
-        Matter.Body.setVelocity(this.body, {y:-15, x:this.body.velocity.x});
-    }
-    stopMoveUp() {
-        this.isMovingUp = false;
-    }
-
-    startMoveDown() { // same here
+    startMoveDown() {
         if (this.isMovingUp) this.stopMoveUp();
         this.isMovingDown = true;
-        //this.body.render.sprite.texture = 'img/blobflipped.png';
     }
     doMoveDown() {
-        if (this.isOnGround || this.isFrozen) return;
-        Matter.Body.setVelocity(this.body, {y:15, x:this.body.velocity.x});
+        if (this.isOnGround || this.isFrozen || this.usedDownDash) return;
+        Matter.Body.setVelocity(this.body, {y:this.moveDownSpeed, x:this.body.velocity.x});
+        this.usedDownDash = true;
     }
     stopMoveDown() {
         this.isMovingDown = false;
@@ -184,6 +221,20 @@ class Blob {
         this.jumpShort();
     }
 
+    dashLeft() {
+        var speed = Math.abs(this.body.velocity.y);
+        Matter.Body.setVelocity(this.body, {x:-speed, y:-speed/2});
+    }
+    dashRight() {
+        var speed = Math.abs(this.body.velocity.y);
+        Matter.Body.setVelocity(this.body, {x:speed, y:-speed/2});
+    }
+    dashUp() {
+        if (this.usedUpDash) return;
+        Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.dashUpSpeed});
+        this.usedDashUp = true;
+    }
+
     jump() {
         if (!this.isOnGround || this.isFrozen) return;
         
@@ -195,62 +246,96 @@ class Blob {
         if (!this.isOnGround || this.isFrozen || !this.isChargingJump) return;
         var speed = Math.min(-this.chargingJumpSpeed, -this.jumpSpeed);
         Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:speed});
-        console.log(this.chargingJumpSpeed);
         this.isChargingJump = false;
         this.chargingJumpSpeed = 0;
         this.isOnGround = false; // so jump() doesnt override this
     }
 
 
-    jumpShort() { //also resets x velocity
+    jumpShort() {
         if (this.body.velocity.y < -this.jumpShortSpeed) {
             Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpShortSpeed});
         }       
     }
-	//bounce(){ //outdated
-		//for(var i = 0; i < 300 && this.body.render.sprite.yScale < 0.70; i++){
-			//setTimeout(function(blobbody){
-				//blobbody.render.sprite.yScale += 0.0001;
-				
-				//blobbody.render.sprite.xScale -= 0.0001;
-				//blobbody.render.sprite.yOffset += 0.0001;
-			//}, i, this.body);
-		//}
-	//}
 		
 }
 
 class Game {
+    constructor(level) {
+        this.level = level;
+    }
     start() {
         this.engine = Matter.Engine.create();
         this.render = Matter.Render.create({
-            element: document.body,
+            element: document.getElementById("maindiv"),
             engine: this.engine,
             options: {
-                width: 900,
-                height: 600,
+                background: COLOURS.white,
+                width: 1200,
+                height: 800,
                 wireframes: false
             }
         });
 
         this.blob = new Blob();
-        var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {isStatic:true, label:'ground'});
-		var wall = Matter.Bodies.rectangle(0, 900, 10, 4000, {isStatic:true, label:'wall'});
-		var wall1 = Matter.Bodies.rectangle(900, 900, 10, 4000, {isStatic:true, label:'wall'});
-        var ceiling = Matter.Bodies.rectangle(400, -50, 2010, 10, {isStatic:true, label:'wall'});
 
-		var plat1 = Matter.Bodies.rectangle(300, 470, 900, 10, {isStatic:true, label:'ground'});
-		var plat2 = Matter.Bodies.rectangle(1200, 380, 2100, 10, {isStatic:true, label:'ground'});
+        var blocks = [];
 
+        const blockFuncs = {
+            [BLOCKS.ground]: block => {
+                blocks.push(Matter.Bodies.rectangle(block[1], block[2], block[3], block[4], {
+                    isStatic: true,
+                    label: 'ground',
+                    render: {
+                        fillStyle: COLOURS.black
+                    }
+                }));
+            },
+            [BLOCKS.wall]: block => {
+                blocks.push(Matter.Bodies.rectangle(block[1], block[2], block[3], block[4], {
+                    isStatic: true,
+                    label: 'wall',
+                    render: {
+                        fillStyle: COLOURS.black
+                    }
+                })); 
+            },
+            [BLOCKS.boost]: block => { // boost blocks have no functionality right now
+                blocks.push(Matter.Bodies.rectangle(block[1], block[2], block[3], block[4], {
+                    isStatic: true,
+                    label: 'boost',
+                    render: {
+                        fillStyle: COLOURS.blue
+                    }
+                })); 
+            },
+            [BLOCKS.win]: block => {
+                blocks.push(Matter.Bodies.rectangle(block[1], block[2], block[3], block[4], {
+                    isStatic: true,
+                    label: 'win',
+                    render: {
+                        fillStyle: COLOURS.green
+                    }
+                }));
+            },
+            [BLOCKS.death]: block => {
+                blocks.push(Matter.Bodies.rectangle(block[1], block[2], block[3], block[4], {
+                    isStatic: true,
+                    label: 'death',
+                    render: {
+                        fillStyle: COLOURS.red
+                    }
+                }));
+            }
+        }
 
-		wall.restitution = 1.7;
-		wall1.restitution = 1.7;
+        for (const block of LEVELS[this.level]) {
+            blockFuncs[block[0]](block);
+        }
 
-		
-		var dieBlock = Matter.Bodies.rectangle(450, 300, 30, 80, {isStatic:true, label:'die', render:{fillStyle:'red'}});
-		var winBlock = Matter.Bodies.rectangle(470, 300, 30, 80, {isStatic:true, label:'win', render:{fillStyle:'green'}});
+        blocks.push(this.blob.body);
 
-        Matter.World.add(this.engine.world, [ground, wall, wall1,ceiling, plat1, plat2,this.blob.body, dieBlock, winBlock]);
+        Matter.World.add(this.engine.world, blocks);
 
         Matter.Engine.run(this.engine);
         Matter.Render.run(this.render);
@@ -258,7 +343,7 @@ class Game {
         this.keys = {};
 
         this.keyFuncs = {
-            [CONTROLS.moveLeft]: { //left
+            [CONTROLS.moveLeft]: {
                 up: () => {
                     this.blob.startMoveLeft();
                 },
@@ -266,7 +351,7 @@ class Game {
                     this.blob.stopMoveLeft();
                 }
             },
-            [CONTROLS.moveUp]: { // up
+            [CONTROLS.moveUp]: {
                 up: () => {
                     this.blob.holdJump();
                 },
@@ -274,7 +359,7 @@ class Game {
                     this.blob.unHoldJump();
                 }
             },
-            [CONTROLS.moveRight]: { // right
+            [CONTROLS.moveRight]: {
                 up: () => {
                     this.blob.startMoveRight();
                 },
@@ -282,15 +367,7 @@ class Game {
                     this.blob.stopMoveRight();
                 }
             },
-            67: { // c, debug
-                up: () => {
-                    this.blob.startMoveUp();
-                },
-                down: () => {
-                    this.blob.stopMoveUp();
-                }
-            },
-            [CONTROLS.moveDown]: { //down
+            [CONTROLS.moveDown]: {
                 up: () => {
 					this.blob.startMoveDown();
 				},
@@ -298,38 +375,24 @@ class Game {
 					this.blob.stopMoveDown();
 				}
             },
-            68: { // d
+            [CONTROLS.dashLeft]: {
                 up: () => {
-					this.blob.startMoveDash();
+					this.blob.dashLeft();
 				},
-                down: () => {
-					this.blob.stopMoveDash();
-				}
+                down: () => {}
             },
-            90: { // z, debug
+            [CONTROLS.dashRight]: {
                 up: () => {
-                    this.blob.body.render.sprite.yScale += 0.1;
-                    this.blob.body.render.sprite.xScale -= 0.1;
-                    this.blob.body.render.sprite.yOffset += 0.1;
+                    this.blob.dashRight();
                 },
                 down: () => {}
             },
-            88: { // x, debug
+            [CONTROLS.dashUp]: {
                 up: () => {
-                    this.blob.body.render.sprite.yScale -= 0.1;
-                    this.blob.body.render.sprite.xScale += 0.1;
-                    this.blob.body.render.sprite.yOffset -= 0.1;
+                    this.blob.dashUp();
                 },
                 down: () => {}
-            },
-			20: { //Caps lock
-				up: () =>{
-					this.blob.isFrozen = true;
-				},
-				down: () => {
-					this.blob.isFrozen = false;
-				}
-			}
+            }
         };
         
         var t = this; 
@@ -341,17 +404,19 @@ class Game {
         Matter.Events.on(this.engine, 'collisionEnd', e => {
             var pairs = e.pairs[0];
             if (
-                (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'ground') ||
-                (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'ground')
+                (pairs.bodyA.label === 'blob' && pairs.bodyB.label === 'ground') ||
+                (pairs.bodyB.label === 'blob' && pairs.bodyA.label === 'ground')
             ) {
                 if (this.blob.isOnGround) {
                     this.blob.isOnGround = false;
                 }
+                this.blob.usedDownDash = false;
+                this.blob.usedUpDash = false;
             }
             
             if (
-                (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'wall') ||
-                (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'wall')
+                (pairs.bodyA.label === 'blob' && pairs.bodyB.label === 'wall') ||
+                (pairs.bodyB.label === 'blob' && pairs.bodyA.label === 'wall')
             ) {
                 if (this.blob.isOnWall) {
                     this.blob.isOnWall = false;
@@ -363,15 +428,14 @@ class Game {
         Matter.Events.on(this.engine, 'collisionStart', e => {
             var pairs = e.pairs[0];
             if (
-                (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'ground') ||
-                (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'ground')
+                (pairs.bodyA.label === 'blob' && pairs.bodyB.label === 'ground') ||
+                (pairs.bodyB.label === 'blob' && pairs.bodyA.label === 'ground')
             ) {
                 if (!this.blob.isOnGround) {
 
                     this.blob.isOnGround = true;
 
                     var intensity = 3/(Math.abs(this.blob.body.velocity.y)+5)+0.3;
-                    console.log(intensity);
 
                     this.blob.boostTimer = 0;
                     this.blob.chargingJumpSpeed = this.blob.body.velocity.y;
@@ -383,15 +447,14 @@ class Game {
 			this.blob.isBounce = true;
 			this.blob.usedDash = false;
             if (
-                (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'wall') ||
-                (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'wall')
+                (pairs.bodyA.label === 'blob' && pairs.bodyB.label === 'wall') ||
+                (pairs.bodyB.label === 'blob' && pairs.bodyA.label === 'wall')
             ) {
 
                 if (!this.blob.isOnWall) {
                     this.blob.isOnWall = true;
 
                     var intensity = 3/(Math.abs(this.blob.body.velocity.x)+5)+0.3;
-                    console.log(intensity);
 
                     this.blob.playAnimation(25, intensity, 25, 0.85);
 
@@ -498,8 +561,6 @@ class Game {
         if (e.keyCode in this.keyFuncs) {
             this.keyFuncs[e.keyCode].up();
         }
-
-        //console.log(e.keyCode);
     }
 
     handleKeyUp(e) {
@@ -509,8 +570,18 @@ class Game {
             this.keyFuncs[e.keyCode].down();
         }
     }
+
+    stop() {
+        Matter.Render.stop(this.render);
+        Matter.World.clear(this.engine.world);
+        Matter.Engine.clear(this.engine);
+        this.render.canvas.remove();
+        this.render.canvas = null;
+        this.render.context = null;
+        this.render.textures = {};
+    }
 }
 
-var game = new Game();
+var game = new Game(1);
 
 game.start();
