@@ -149,7 +149,7 @@ class Blob {
         }       
     }
 	bounce(){
-		for(var i = 0; i < 300 && this.body.render.sprite.yScale < 0.75; i++){
+		for(var i = 0; i < 300 && this.body.render.sprite.yScale < 0.70; i++){
 			setTimeout(function(blobbody){
 				blobbody.render.sprite.yScale += 0.0001;
 				
@@ -177,7 +177,7 @@ class Game {
         this.blob = new Blob();
         var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {isStatic:true, label:'ground'});
 		var wall = Matter.Bodies.rectangle(0, 900, 10, 4000, {isStatic:true, label:'wall'});
-		
+		wall.restitution = 1.7;
 		
         Matter.World.add(this.engine.world, [ground, wall, this.blob.body]);
 
@@ -304,7 +304,7 @@ class Game {
 
 			this.blob.body.render.sprite.xScale = xScale;
 		}
-        if (this.blob.touchWall.start) {
+        if (this.blob.touchWall.start && false) {
             this.blob.fixInPlace()
             console.log(this.blob.touchWall.timer)
             this.blob.touchWall.timer++
