@@ -71,6 +71,17 @@
             display: none;
             font-size: 50px;
         }
+		#infodiv {
+            background-color: #7180AC;
+            position: fixed;
+            color: #EEEEEE;
+            height: 280px;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            padding-top: 20px;
+            font-size: 50px;
+        }
         #losediv {
             background-color: #D33F49;
             position: fixed;
@@ -86,6 +97,7 @@
         #losediv p {
             padding-top: -20px;
         }
+		
     </style>
     <body>
         <!--<canvas id="display" width="800" height="600" style="border:1px solid black"></canvas>-->
@@ -100,14 +112,26 @@
             <h1 id="losetext">Level failed!</h1>
             <p>Press q to restart</p>
         </div>
+		<div id="infodiv" class="center">
+			<h1 id="wintext" style="margin:0; margin-top:20px;">Zoom out to play!</h1>
+			<h5 style="margin: 0">(Click to hide this banner)</h5>
+		</div>
         <div id="maindiv" class="center"></div>
         <div id="leveldiv" class="center"></div> 
         <p id="footer">blob bounce • <a href="https://github.com/Potatoritos/htn2020">GitHub</p>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.14.2/matter.min.js"></script>
         <script src="main.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
 		<script>
+		$("#infodiv").click(
+			function(){
+				$("#infodiv").hide();
+			}
+		);
+		
+
         </script>
     </body>
 </html>
