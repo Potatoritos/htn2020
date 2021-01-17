@@ -135,7 +135,9 @@ class Blob {
 			}
 		}
 	}
-	
+	getHCompScale(duration, frame) {
+		return Math.min(BLOB_DEFAULT_SCALE, 0.00092*Math.pow(30/duration, 2)*Math.pow(frame - duration/2, 2) + 0.5);
+	}
 }
 
 class Game {
