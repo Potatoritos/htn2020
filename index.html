@@ -59,6 +59,33 @@
         #footer a:visited {
             color: #7e7c7c;
         }
+        #windiv {
+            background-color: #15B097;
+            position: fixed;
+            color: #EEEEEE;
+            height: 280px;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            padding-top: 20px;
+            display: none;
+            font-size: 50px;
+        }
+        #losediv {
+            background-color: #D33F49;
+            position: fixed;
+            color: #EEEEEE;
+            height: 380px;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            padding-top: 20px;
+            display: none;
+            font-size: 50px
+        }
+        #losediv p {
+            padding-top: -20px;
+        }
     </style>
     <body>
         <!--<canvas id="display" width="800" height="600" style="border:1px solid black"></canvas>-->
@@ -66,6 +93,13 @@
 		<!--<h3>Timer</h3>-->
 		<!--<h1 id="timer"></h1>-->
 		<!--</div>-->
+        <div id="windiv" class="center">
+            <h1 id="wintext">Level complete!</h1>
+        </div>
+        <div id="losediv" class="center">
+            <h1 id="losetext">Level failed!</h1>
+            <p>Press q to restart</p>
+        </div>
         <div id="maindiv" class="center"></div>
         <div id="leveldiv" class="center"></div> 
         <p id="footer">blob bounce • <a href="https://github.com/Potatoritos/htn2020">GitHub</p>
@@ -74,20 +108,6 @@
         <script src="main.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
 		<script>
-		/*window.timer = false;
-		var now = new Date().getTime();
-		
-		function formatTime(ms) {
-		  var format = "mm:ss:SS";
-		  if (ms > 3600000) {
-			format = "HH:mm:ss:SS";
-		  }
-		  return moment().startOf('day').add(ms, 'milliseconds').format(format);
-		}
-		setInterval(function(){
-			if(!window.timer)
-			document.getElementById("timer").innerHTML = formatTime(new Date().getTime()-now);
-		}, 1);*/
         </script>
     </body>
 </html>
