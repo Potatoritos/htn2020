@@ -10,6 +10,8 @@ const BLOB_HEIGHT = 98;
 const BLOB_WIDTH = 80
 const BLOB_DEFAULT_SCALE = 0.7
 
+
+
 var gameOver = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'gameOver', render:{fillStyle:'red'}});
 gameOver.render.sprite.texture = "../img/gameover.png";
 

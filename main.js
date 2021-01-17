@@ -10,6 +10,13 @@ const BLOB_HEIGHT = 98;
 const BLOB_WIDTH = 80
 const BLOB_DEFAULT_SCALE = 0.7
 
+var gameOver = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'gameOver', render:{fillStyle:'red'}});	
+gameOver.render.sprite.texture = "img/gameover.png";	
+
+
+var winGame = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'winGame', render:{fillStyle:'red'}});	
+winGame.render.sprite.texture = "img/youwon.png";
+
 function getCompScale(duration, frame, scaleTo) {
     // duration is how many frames the animation has
     // frame is the current frame of the animation
@@ -60,6 +67,7 @@ class Blob {
         this.isMovingUp = false;
 		this.isBounce = false;
 		this.usedDash = false;
+		this.isLost = false;
 		this.isShortBounce =false;
         this.isMovingDown = false;
 
@@ -110,6 +118,7 @@ class Blob {
     }
 
     startMoveLeft() { 
+		if(this.isLost) return;
         if (this.isMovingRight) this.stopMoveRight();
         this.isMovingLeft = true;
         this.body.render.sprite.texture = 'img/blob.png';
@@ -128,6 +137,7 @@ class Blob {
         this.isHoldingDash = false;
     }
     startMoveRight() { // same here
+		if(this.isLost) return;	
         if (this.isMovingLeft) this.stopMoveLeft();
         this.isMovingRight = true;
         this.body.render.sprite.texture = 'img/blobflipped.png';
@@ -223,9 +233,21 @@ class Game {
         this.blob = new Blob();
         var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {isStatic:true, label:'ground'});
 		var wall = Matter.Bodies.rectangle(0, 900, 10, 4000, {isStatic:true, label:'wall'});
-		//wall.restitution = 1.7;
+		var wall1 = Matter.Bodies.rectangle(900, 900, 10, 4000, {isStatic:true, label:'wall'});
+        var ceiling = Matter.Bodies.rectangle(400, -50, 2010, 10, {isStatic:true, label:'wall'});
+
+		var plat1 = Matter.Bodies.rectangle(300, 470, 900, 10, {isStatic:true, label:'ground'});
+		var plat2 = Matter.Bodies.rectangle(1200, 380, 2100, 10, {isStatic:true, label:'ground'});
+
+
+		wall.restitution = 1.7;
+		wall1.restitution = 1.7;
+
 		
-        Matter.World.add(this.engine.world, [ground, wall, this.blob.body]);
+		var dieBlock = Matter.Bodies.rectangle(450, 300, 30, 80, {isStatic:true, label:'die', render:{fillStyle:'red'}});
+		var winBlock = Matter.Bodies.rectangle(470, 300, 30, 80, {isStatic:true, label:'win', render:{fillStyle:'green'}});
+
+        Matter.World.add(this.engine.world, [ground, wall, wall1,ceiling, plat1, plat2,this.blob.body, dieBlock, winBlock]);
 
         Matter.Engine.run(this.engine);
         Matter.Render.run(this.render);
@@ -378,6 +400,19 @@ class Game {
                 //this.blob.touchWall.keys[3] = this.keys[39] //wasd
                 //this.blob.touchWall.start = true;
             }
+			if(pairs.bodyA.label ==="die" || pairs.bodyB.label === "die"){	
+				Matter.World.add(this.engine.world, [gameOver]);	
+				this.blob.isFrozen = true;	
+				this.blob.body.render.sprite.texture = "img/sadblob.png";	
+				this.blob.isLost = true;	
+			}	
+			if(pairs.bodyA.label ==="win" || pairs.bodyB.label === "win"){	
+				Matter.World.add(this.engine.world, [winGame]);	
+				window.timer = true;	
+				this.blob.isFrozen = true;	
+
+
+			}
         });
     }
 
@@ -424,71 +459,6 @@ class Game {
             this.blob.body.render.sprite.xScale = scale;
             //this.blob.body.render.sprite.xOffset = getXBCompOffset(scale); //TODO: implement
         }
-
-		//if(this.blob.isBounce){
-			//this.bob++;
-			//this.bob %= 41;
-			//if (this.bob == 21) this.blob.isBounce = false;
-			
-			//var duration = this.blob.isShortBounce ? 5: 20;
-			
-			//var yScale = getHCompScale(20, this.bob);
-			//var yOffset = getYBCompOffset(yScale);
-
-			//var xScale = getVCompScale(20, this.bob);
-
-			//this.blob.body.render.sprite.yScale = yScale;
-			//this.blob.body.render.sprite.yOffset = yOffset;
-
-			//this.blob.body.render.sprite.xScale = xScale;
-		//}
-
-        //if (this.blob.touchWall.start && false) {
-            //this.blob.fixInPlace()
-            //console.log(this.blob.touchWall.timer)
-            //this.blob.touchWall.timer++
-
-            //if (this.keys[37]!=true && this.blob.touchWall.keys[1]){
-                //this.blob.touchWall.x = -1
-            //}
-            //if (this.keys[38]!=true && this.blob.touchWall.keys[0]){
-                //this.blob.touchWall.y = 1
-            //}
-            //if (this.keys[40]!=true && this.blob.touchWall.keys[2]){
-                //this.blob.touchWall.y = -1
-            //}
-            //if (this.keys[39]!=true && this.blob.touchWall.keys[3]){
-                //this.blob.touchWall.x = 1
-            //}
-
-            //this.blob.touchWall.keys[0] = this.keys[38] //wasd its actually ijkl but this is easier to undrestand
-            //this.blob.touchWall.keys[1] = this.keys[37] //wasd
-            //this.blob.touchWall.keys[2] = this.keys[40] //wasd
-            //this.blob.touchWall.keys[3] = this.keys[39] //wasd
-
-            //if (this.blob.touchWall.timer == 31){
-                //this.blob.unFixInPlace()
-                //this.blob.touchWall.timer = 0
-                //this.blob.touchWall.start = false
-                //console.log(this.blob.touchWall.x)
-                //if (this.blob.touchWall.x==1){
-                    //this.blob.startMoveRight();
-                //}
-                //if (this.blob.touchWall.x==-1){
-                    //this.blob.startMoveLeft();
-                //}
-                //if (this.blob.touchWall.y==1){
-                    //this.blob.doMoveUp()
-                //}
-                //if (this.blob.touchWall.y==-1){
-                    //this.blob.doMoveDown()
-                //}
-
-                ////console.log(this.blob.touchWall.keys)
-                ////console.log(this.blob.touchWall.x)
-                ////console.log(this.blob.touchWall.y)
-            //}
-        //}
 
         if (this.blob.isMovingLeft) {
             this.blob.doMoveLeft();
