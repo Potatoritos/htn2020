@@ -210,7 +210,11 @@ class Game {
 		var wall = Matter.Bodies.rectangle(0, 900, 10, 4000, {isStatic:true, label:'wall'});
 		wall.restitution = 1.7;
 		
-        Matter.World.add(this.engine.world, [ground, wall, this.blob.body]);
+		var dieBlock = Matter.Bodies.rectangle(450, 540, 30, 80, {isStatic:true, label:'die', render:{fillStyle:'red'}});
+		var gameOver = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'gameOver', render:{fillStyle:'red'}});
+		gameOver.render.sprite.texture = "img/gameover.png";
+		
+        Matter.World.add(this.engine.world, [ground, wall, this.blob.body, dieBlock, gameOver]);
 
         Matter.Engine.run(this.engine);
         Matter.Render.run(this.render);
