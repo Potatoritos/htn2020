@@ -199,8 +199,8 @@ class Game {
             element: document.body,
             engine: this.engine,
             options: {
-                width: document.body.clientWidth,
-                height: document.body.clientHeight,
+                width: 900,
+                height: 600,
                 wireframes: false
             }
         });
