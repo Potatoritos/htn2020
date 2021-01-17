@@ -46,52 +46,12 @@ const LEVELS = {
         ]
     },
     2: {
-        spawnpoint: [200, 0],
-        blocks: [
-            [BLOCKS.ground, 400, 600, 2010, 60],
-            [BLOCKS.wall, 0, 900, 10, 4000],
-            [BLOCKS.wall, 400, -50, 2010, 10],
-            [BLOCKS.ground, 300, 470, 900, 10],
-            [BLOCKS.ground, 1200, 380, 2100, 10],
-            [BLOCKS.death, 450, 300, 30, 80],
-        ]
-    },
-    3: {
-        spawnpoint: [200, 0],
-        blocks: [
-            [BLOCKS.ground, 400, 600, 2010, 60],
-            [BLOCKS.wall, 0, 900, 10, 4000],
-            [BLOCKS.wall, 400, -50, 2010, 10],
-            [BLOCKS.ground, 300, 470, 900, 10],
-            [BLOCKS.ground, 1200, 380, 2100, 10],
-            [BLOCKS.death, 450, 300, 30, 80]
-        ]
-    },
-    4: {
-        spawnpoint: [50, 600],
-        blocks: [
-            [BLOCKS.ground, 0, 800, 300, 60],
-            [BLOCKS.ground, 170, 670, 10, 20],
-            [BLOCKS.death, 170, 660, 10, 3],
-
-            [BLOCKS.ground, 560, 390, 10, 20],
-            [BLOCKS.death, 560, 380, 10, 3],
-            
-            [BLOCKS.ground, 390, 520, 200, 20],
-
-            [BLOCKS.win, 800, 300, 200, 20],
-            
-            [BLOCKS.death, 750, 800, 1200, 60],
-            [BLOCKS.wall, 0, 800, 10, 4000],
-            [BLOCKS.wall, 140, 770, 10, 30]
-        ]
-    },
-    5: {
         spawnpoint: [50, 500],
         blocks: [
             [BLOCKS.ground, 0, 600, 300, 20],
             
             [BLOCKS.ground, 1200, 600, 300, 20],
+            [BLOCKS.win, 1250, 585, 200, 10],
             
             //[BLOCKS.ground, 900, 350, 150, 20],
             
@@ -110,7 +70,7 @@ const LEVELS = {
             [BLOCKS.wall, 1200, 800, 10, 4000],
         ]
     },
-    6: {
+    3: {
         spawnpoint: [50, 500],
         blocks: [
             [BLOCKS.ground, 50, 600, 700, 20],
@@ -136,7 +96,26 @@ const LEVELS = {
             [BLOCKS.wall, 1200, 800, 10, 4000],
         ]
     },
-    7: {
+    4: {
+        spawnpoint: [50, 600],
+        blocks: [
+            [BLOCKS.ground, 0, 800, 300, 60],
+            [BLOCKS.ground, 170, 670, 10, 20],
+            [BLOCKS.death, 170, 660, 10, 3],
+
+            [BLOCKS.ground, 560, 390, 10, 20],
+            [BLOCKS.death, 560, 380, 10, 3],
+            
+            [BLOCKS.ground, 390, 520, 200, 20],
+
+            [BLOCKS.win, 800, 300, 200, 20],
+            
+            [BLOCKS.death, 750, 800, 1200, 60],
+            [BLOCKS.wall, 0, 800, 10, 4000],
+            [BLOCKS.wall, 140, 770, 10, 30]
+        ]
+    },
+    5: {
         spawnpoint: [50, 500],
         blocks: [
             [BLOCKS.ground, 50, 600, 300, 20],
