@@ -1,3 +1,34 @@
+const CONTROLS = {
+    moveLeft: 37,   // left arrow
+    moveRight: 39,  // right arrow
+    moveUp: 38,     // up arrow
+    moveDown: 40,   // down arrow
+    dash: 68        // d
+}
+
+const BLOB_HEIGHT = 98;
+const BLOB_WIDTH = 80
+const BLOB_DEFAULT_SCALE = 0.7
+
+function getHCompScale(duration, frame) {
+    return Math.min(BLOB_DEFAULT_SCALE, 0.00092*Math.pow(30/duration, 2)*Math.pow(frame - duration/2, 2) + 0.5);
+}
+
+function getYUCompOffset(scale) {
+    return (BLOB_DEFAULT_SCALE-scale)*BLOB_HEIGHT * 1/BLOB_HEIGHT + 0.4;
+}
+
+function getVCompScale(duration, frame) {
+    return scale = Math.max(BLOB_DEFAULT_SCALE, -0.0007*Math.pow(30/duration, 2)*Math.pow(frame - duration/2, 2) + 0.85);
+}
+
+function getXCompOffset(scale) { // does not work i think
+    return (BLOB_DEFAULT_SCALE-scale)*BLOB_WIDTH * 1/BLOB_WIDTH;
+}
+
+
+
+
 class Blob {
     constructor() {
         this.body = Matter.Bodies.rectangle(400, 0, 50, 50, {
@@ -13,9 +44,9 @@ class Blob {
                 }
             }
         });
-        this.jumpSpeed = 8;
+        this.jumpSpeed = 9;
         this.jumpShortSpeed = 4;
-        this.moveSpeed = 6;
+        this.moveSpeed = 5;
 
         this.isMovingLeft = false;
         this.isMovingRight = false;
@@ -115,29 +146,6 @@ class Blob {
             Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpShortSpeed});
         }       
     }
-	bounce(){
-		this.bounceDown();
-	}
-	bounceDown(){
-		for(var i = 0; i < 300; i+=3){
-			if(i>=150){
-				setTimeout(function(blobbody){
-					blobbody.render.sprite.yScale += 0.005;
-					blobbody.render.sprite.xScale -= 0.005;
-					blobbody.render.sprite.yOffset += 0.005;
-				}, i, this.body);
-			} else {
-				setTimeout(function(blobbody){
-					blobbody.render.sprite.yScale -= 0.005;
-					blobbody.render.sprite.xScale += 0.005;
-					blobbody.render.sprite.yOffset -= 0.005;
-				}, i, this.body);
-			}
-		}
-	}
-	getHCompScale(duration, frame) {
-		return Math.min(BLOB_DEFAULT_SCALE, 0.00092*Math.pow(30/duration, 2)*Math.pow(frame - duration/2, 2) + 0.5);
-	}
 }
 
 class Game {
@@ -149,15 +157,21 @@ class Game {
             options: {
                 width: document.body.clientWidth,
                 height: document.body.clientHeight,
-                wireframes: false
+                wireframes: false,
+                background: "#cccccc"
             }
         });
 
         this.blob = new Blob();
-        var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {isStatic:true, label:'ground'});
+        var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {
+            isStatic:true,
+            label:'ground',
+            render: {
+                fillStyle: "#000000"
+            }
+        });
 		var wall = Matter.Bodies.rectangle(0, 900, 10, 4000, {isStatic:true, label:'wall'});
-		
-		
+
         Matter.World.add(this.engine.world, [ground, wall, this.blob.body]);
 
         Matter.Engine.run(this.engine);
@@ -166,7 +180,7 @@ class Game {
         this.keys = {};
 
         this.keyFuncs = {
-            37: { //left
+            [CONTROLS.moveLeft]: {
                 up: () => {
                     this.blob.startMoveLeft();
                 },
@@ -174,7 +188,7 @@ class Game {
                     this.blob.stopMoveLeft();
                 }
             },
-            38: { // up
+            [CONTROLS.moveUp]: {
                 up: () => {
                     this.blob.holdJump();
                 },
@@ -182,7 +196,7 @@ class Game {
                     this.blob.unHoldJump();
                 }
             },
-            39: { // right
+            [CONTROLS.moveRight]: {
                 up: () => {
                     this.blob.startMoveRight();
                 },
@@ -192,13 +206,14 @@ class Game {
             },
             67: { // c, debug
                 up: () => {
-                    this.blob.startMoveUp();
+                    //this.blob.startMoveUp();
+                    this.blob.body.render.sprite.yOffset = getYUCompOffset(this.blob.body.render.sprite.yScale);
                 },
                 down: () => {
-                    this.blob.stopMoveUp();
+                    //this.blob.stopMoveUp();
                 }
             },
-            40: { //down
+            [CONTROLS.moveDown]: { //down
                 up: () => {
 					this.blob.startMoveDown();
 				},
@@ -206,26 +221,27 @@ class Game {
 					this.blob.stopMoveDown();
 				}
             },
-            68: { // d
+            [CONTROLS.dash]: { // d
                 up: () => {},
                 down: () => {}
             },
             90: { // z, debug
                 up: () => {
-                    this.blob.body.render.sprite.yScale += 0.1;
-                    this.blob.body.render.sprite.xScale -= 0.1;
-                    this.blob.body.render.sprite.yOffset += 0.1;
+                    this.blob.body.render.sprite.yScale -= 0.1;
+                    //this.blob.body.render.sprite.xScale -= 0.1;
+                    //this.blob.body.render.sprite.yOffset += 0.1;
                 },
                 down: () => {}
             },
             88: { // x, debug
                 up: () => {
-                    this.blob.body.render.sprite.yScale -= 0.1;
-                    this.blob.body.render.sprite.xScale += 0.1;
+                    //this.blob.body.render.sprite.yScale -= 0.1;
+                    //this.blob.body.render.sprite.xScale += 0.1;
                     this.blob.body.render.sprite.yOffset -= 0.1;
                 },
                 down: () => {}
             },
+
 			20: { //Caps lock
 				up: () =>{
 					this.blob.isFrozen = true;
@@ -240,7 +256,7 @@ class Game {
         document.addEventListener('keydown', e => {t.handleKeyDown(e)}, false);
         document.addEventListener('keyup', e => {t.handleKeyUp(e)}, false);
         setInterval(function() {t.loop()}, 16.666666);
-		
+
         Matter.Events.on(this.engine, 'collisionStart', e => {
             var pairs = e.pairs[0];
             if (
@@ -250,7 +266,7 @@ class Game {
                 this.blob.isOnGround = true;
 				
             }
-			this.blob.bounce();
+
             if (
                 (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'wall') ||
                 (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'wall')
@@ -263,9 +279,23 @@ class Game {
             }
         });
 
+        this.bob = 0;
     }
 
     loop() {
+        this.bob++;
+        this.bob %= 41;
+        if (this.bob == 0) this.bob++;
+
+        var yScale = getHCompScale(40, this.bob);
+        var yOffset = getYUCompOffset(yScale);
+
+        var xScale = getVCompScale(40, this.bob);
+
+        this.blob.body.render.sprite.yScale = yScale;
+        this.blob.body.render.sprite.yOffset = -yOffset;
+
+        this.blob.body.render.sprite.xScale = xScale;
 
         if (this.blob.touchWall.start) {
             this.blob.fixInPlace()
