@@ -1,11 +1,11 @@
 const CONTROLS = {
-    moveUp: 73,     // i
-    moveLeft: 74,   // j
-    moveDown: 75,   // k
-    moveRight: 76,  // l
-    dashLeft: 83,   // s
-    dashRight: 70,  // f
-    dashUp: 68      // d
+    moveUp:     73, // i
+    moveLeft:   74, // j
+    moveDown:   75, // k
+    moveRight:  76, // l
+    dashLeft:   83, // s
+    dashRight:  70, // f
+    dashUp:     68  // d
 };
 
 /* 37 left arrow
@@ -16,19 +16,19 @@ const CONTROLS = {
 
 const COLOURS = {
     yellow: '#FCC21C',
-    white: '#EEEEEE',
-    red: '#D33F49',
-    black: '#2C2B2B',
-    blue: '#7180AC',
-    green: '#15B097'
+    white:  '#EEEEEE',
+    red:    '#D33F49',
+    black:  '#2C2B2B',
+    blue:   '#7180AC',
+    green:  '#15B097'
 };
 
 const BLOCKS = {
     ground: 0,
-    wall: 1,
-    win: 2,
-    boost: 3,
-    death: 4
+    wall:   1,
+    win:    2,
+    boost:  3,
+    death:  4
 };
 
 const LEVELS = {
@@ -40,6 +40,14 @@ const LEVELS = {
         [BLOCKS.ground, 1200, 380, 2100, 10],
         [BLOCKS.death, 450, 300, 30, 80],
         [BLOCKS.win, 470, 300, 30, 80]
+    ],
+    2: [ // test
+        [BLOCKS.ground, 400, 600, 2010, 60],
+        [BLOCKS.wall, 0, 900, 10, 4000],
+        [BLOCKS.wall, 400, -50, 2010, 10],
+        [BLOCKS.ground, 300, 470, 900, 10],
+        [BLOCKS.ground, 1200, 380, 2100, 10],
+        [BLOCKS.death, 450, 300, 30, 80]
     ]
 };
 
@@ -82,7 +90,7 @@ class Blob {
         this.body = Matter.Bodies.rectangle(400, 0, 50, 50, {
             mass: 100,
             label: 'blob',
-            inertia: 99999999999, // disable rotation
+            inertia: 99999999999, // disable rotation (Infinity does not work)
             render: {
                 sprite: {
                     texture: 'img/blob.png',
@@ -223,11 +231,19 @@ class Blob {
 
     dashLeft() {
         var speed = Math.abs(this.body.velocity.y);
-        Matter.Body.setVelocity(this.body, {x:-speed, y:-speed/2});
+        var ySpeed = speed/2;
+        if (speed <= this.moveSpeed) {
+            var ySpeed = -1;
+        }
+        Matter.Body.setVelocity(this.body, {x:-speed, y:-ySpeed});
     }
     dashRight() {
         var speed = Math.abs(this.body.velocity.y);
-        Matter.Body.setVelocity(this.body, {x:speed, y:-speed/2});
+        var ySpeed = speed/2;
+        if (speed <= this.moveSpeed) {
+            var ySpeed = -1;
+        }
+        Matter.Body.setVelocity(this.body, {x:speed, y:-ySpeed});
     }
     dashUp() {
         if (this.usedUpDash) return;
@@ -396,9 +412,12 @@ class Game {
         };
         
         var t = this; 
-        //this.bob = 0;
-        document.addEventListener('keydown', e => {t.handleKeyDown(e)}, false);
-        document.addEventListener('keyup', e => {t.handleKeyUp(e)}, false);
+
+        this.handleKeyDownWrapper = e => {t.handleKeyDown(e)}
+        this.handleKeyUpWrapper = e => {t.handleKeyUp(e)}
+
+        document.addEventListener('keydown', this.handleKeyDownWrapper, false);
+        document.addEventListener('keyup', this.handleKeyUpWrapper, false);
         setInterval(function() {t.loop()}, 16.666666);
 
         Matter.Events.on(this.engine, 'collisionEnd', e => {
@@ -572,9 +591,17 @@ class Game {
     }
 
     stop() {
+        clearInterval(this.loop);
+
+        document.removeEventListener('keydown', this.handleKeyDownWrapper, false);
+        document.removeEventListener('keyup', this.handleKeyUpWrapper, false);
+
         Matter.Render.stop(this.render);
         Matter.World.clear(this.engine.world);
         Matter.Engine.clear(this.engine);
+        
+        this.render.canvas.parentNode.removeChild(this.render.canvas);
+
         this.render.canvas.remove();
         this.render.canvas = null;
         this.render.context = null;
@@ -582,6 +609,14 @@ class Game {
     }
 }
 
-var game = new Game(1);
+var game;
 
-game.start();
+function startGame(level) {
+    if (typeof game !== 'undefined') {
+        game.stop();
+    }
+    game = new Game(level);
+    game.start();
+}
+
+startGame(1);
