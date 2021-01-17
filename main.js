@@ -115,6 +115,27 @@ class Blob {
             Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpShortSpeed});
         }       
     }
+	bounce(){
+		this.bounceDown();
+	}
+	bounceDown(){
+		for(var i = 0; i < 300; i+=3){
+			if(i>=150){
+				setTimeout(function(blobbody){
+					blobbody.render.sprite.yScale += 0.005;
+					blobbody.render.sprite.xScale -= 0.005;
+					blobbody.render.sprite.yOffset += 0.005;
+				}, i, this.body);
+			} else {
+				setTimeout(function(blobbody){
+					blobbody.render.sprite.yScale -= 0.005;
+					blobbody.render.sprite.xScale += 0.005;
+					blobbody.render.sprite.yOffset -= 0.005;
+				}, i, this.body);
+			}
+		}
+	}
+	
 }
 
 class Game {
@@ -133,7 +154,8 @@ class Game {
         this.blob = new Blob();
         var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {isStatic:true, label:'ground'});
 		var wall = Matter.Bodies.rectangle(0, 900, 10, 4000, {isStatic:true, label:'wall'});
-
+		
+		
         Matter.World.add(this.engine.world, [ground, wall, this.blob.body]);
 
         Matter.Engine.run(this.engine);
@@ -216,7 +238,7 @@ class Game {
         document.addEventListener('keydown', e => {t.handleKeyDown(e)}, false);
         document.addEventListener('keyup', e => {t.handleKeyUp(e)}, false);
         setInterval(function() {t.loop()}, 16.666666);
-
+		
         Matter.Events.on(this.engine, 'collisionStart', e => {
             var pairs = e.pairs[0];
             if (
@@ -226,7 +248,7 @@ class Game {
                 this.blob.isOnGround = true;
 				
             }
-
+			this.blob.bounce();
             if (
                 (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'wall') ||
                 (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'wall')
@@ -238,11 +260,16 @@ class Game {
                 this.blob.touchWall.start = true;
             }
         });
+		/*Matter.Events.on(this.engine, 'collisionEnd', e=> {
+			this.blob.body.render.sprite.yScale += 0.1;
+			this.blob.body.render.sprite.xScale -= 0.1;
+			this.blob.body.render.sprite.yOffset += 0.1;
+        });*/
     }
 
     loop() {
 
-        if (this.blob.touchWall.start) {
+        if (this.blob.touchWall.start && 0==1) {
             this.blob.fixInPlace()
             console.log(this.blob.touchWall.timer)
             this.blob.touchWall.timer++
