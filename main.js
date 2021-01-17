@@ -36,13 +36,13 @@ const BLOCKS = {
 
 const LEVELS = {
     1: {
-        spawnpoint: [600, 0],
+        spawnpoint: [40, 740],
         blocks: [
-            [BLOCKS.ground, 400, 600, 1200, 60],
-            [BLOCKS.ground, 400, 820, 1200, 60],
+            [BLOCKS.ground, 400, 640, 1200, 40],
+            [BLOCKS.ground, 400, 820, 1800, 60],
             [BLOCKS.wall, 0, 800, 10, 4000],
             [BLOCKS.wall, 1200, 800, 10, 4000],
-            
+			[BLOCKS.tutorial, 200, 100, 200, 300]
         ]
     },
     2: {
@@ -474,7 +474,19 @@ class Game {
                         fillStyle: COLOURS.red
                     }
                 }));
-            }
+            },
+			[BLOCKS.tutorial]: block =>{
+				blocks.push(Matter.Bodies.rectangle(block[1], block[2], block[3], block[4], {
+                    isStatic: true,
+                    label: 'tutorial',
+                    render: {
+                        fillStyle: COLOURS.blue,
+						sprite:{
+							texture: "img/movement.png"
+						}
+                    }
+                }));
+			}
         }
 
         for (const block of LEVELS[this.level].blocks) {
