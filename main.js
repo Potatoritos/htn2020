@@ -38,11 +38,21 @@ const LEVELS = {
     1: {
         spawnpoint: [40, 740],
         blocks: [
-            [BLOCKS.ground, 400, 640, 1200, 40],
             [BLOCKS.ground, 400, 820, 1800, 60],
+            [BLOCKS.ground, 0, 700, 200, 10],
+            [BLOCKS.ground, 0, 500, 200, 10],
+            [BLOCKS.ground, 250, 600, 100, 10],
             [BLOCKS.wall, 0, 800, 10, 4000],
             [BLOCKS.wall, 1200, 800, 10, 4000],
+<<<<<<< Updated upstream
 			[BLOCKS.tutorial, 240, 120, 200, 300]
+=======
+            [BLOCKS.wall, 300, 800, 10, 800],
+            [BLOCKS.wall, 600, 200, 10, 700],
+			[BLOCKS.tutorial, 200, 100, 200, 300],
+            [BLOCKS.death, 1505, 800, 2400, 60],
+            [BLOCKS.win, 1250, 765, 800, 10]
+>>>>>>> Stashed changes
         ]
     },
     2: {
@@ -105,6 +115,7 @@ const LEVELS = {
 
             [BLOCKS.ground, 560, 390, 10, 20],
             [BLOCKS.death, 560, 380, 10, 3],
+            [BLOCKS.wallj, 0, 380, 10, 3],
             
             [BLOCKS.ground, 390, 520, 200, 20],
 
@@ -483,6 +494,18 @@ class Game {
                         fillStyle: COLOURS.blue,
 						sprite:{
 							texture: "img/movement.png"
+						}
+                    }
+                }));
+			},
+			[BLOCKS.wallj]: block =>{
+				blocks.push(Matter.Bodies.rectangle(block[1], block[2], block[3], block[4], {
+                    isStatic: true,
+                    label: 'mech',
+                    render: {
+                        fillStyle: COLOURS.blue,
+						sprite:{
+							texture: "img/mech.png"
 						}
                     }
                 }));
