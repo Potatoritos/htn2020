@@ -47,7 +47,7 @@ const LEVELS = {
 			[BLOCKS.tutorial, 240, 120, 200, 300],
             [BLOCKS.wall, 300, 800, 10, 800],
             [BLOCKS.wall, 600, 200, 10, 700],
-			[BLOCKS.tutorial, 1000, 200, 200, 300],
+			//[BLOCKS.tutorial, 1000, 200, 200, 300],
             [BLOCKS.death, 1505, 800, 2400, 60],
             [BLOCKS.win, 1250, 765, 800, 10]
         ]
