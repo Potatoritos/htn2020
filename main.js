@@ -29,10 +29,6 @@ function getVCompScale(duration, frame) {
 function getXCompOffset(scale) { // does not work i think
     return (BLOB_DEFAULT_SCALE-scale)*BLOB_WIDTH * 1/BLOB_WIDTH;
 }
-
-
-
-
 class Blob {
     constructor() {
         this.body = Matter.Bodies.rectangle(400, 0, 50, 50, {
@@ -56,6 +52,8 @@ class Blob {
         this.isMovingRight = false;
         this.isHoldingJump = false;
         this.isMovingUp = false;
+		this.isBounce = false;
+		this.isShortBounce =false;
         this.isMovingDown = false;
 
         this.isFrozen = false;
@@ -150,6 +148,17 @@ class Blob {
             Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.jumpShortSpeed});
         }       
     }
+	bounce(){
+		for(var i = 0; i < 300 && this.body.render.sprite.yScale < 0.75; i++){
+			setTimeout(function(blobbody){
+				blobbody.render.sprite.yScale += 0.0001;
+				
+				blobbody.render.sprite.xScale -= 0.0001;
+				blobbody.render.sprite.yOffset += 0.0001;
+			}, i, this.body);
+		}
+	}
+		
 }
 
 class Game {
@@ -161,21 +170,15 @@ class Game {
             options: {
                 width: document.body.clientWidth,
                 height: document.body.clientHeight,
-                wireframes: false,
-                background: "#cccccc"
+                wireframes: false
             }
         });
 
         this.blob = new Blob();
-        var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {
-            isStatic:true,
-            label:'ground',
-            render: {
-                fillStyle: "#000000"
-            }
-        });
+        var ground = Matter.Bodies.rectangle(400, 600, 2010, 60, {isStatic:true, label:'ground'});
 		var wall = Matter.Bodies.rectangle(0, 900, 10, 4000, {isStatic:true, label:'wall'});
-
+		
+		
         Matter.World.add(this.engine.world, [ground, wall, this.blob.body]);
 
         Matter.Engine.run(this.engine);
@@ -184,7 +187,7 @@ class Game {
         this.keys = {};
 
         this.keyFuncs = {
-            [CONTROLS.moveLeft]: {
+            [CONTROLS.moveLeft]: { //left
                 up: () => {
                     this.blob.startMoveLeft();
                 },
@@ -192,7 +195,7 @@ class Game {
                     this.blob.stopMoveLeft();
                 }
             },
-            [CONTROLS.moveUp]: {
+            [CONTROLS.moveUp]: { // up
                 up: () => {
                     this.blob.holdJump();
                 },
@@ -200,7 +203,7 @@ class Game {
                     this.blob.unHoldJump();
                 }
             },
-            [CONTROLS.moveRight]: {
+            [CONTROLS.moveRight]: { // right
                 up: () => {
                     this.blob.startMoveRight();
                 },
@@ -210,11 +213,10 @@ class Game {
             },
             67: { // c, debug
                 up: () => {
-                    //this.blob.startMoveUp();
-                    this.blob.body.render.sprite.yOffset = getYBCompOffset(this.blob.body.render.sprite.yScale);
+                    this.blob.startMoveUp();
                 },
                 down: () => {
-                    //this.blob.stopMoveUp();
+                    this.blob.stopMoveUp();
                 }
             },
             [CONTROLS.moveDown]: { //down
@@ -225,27 +227,26 @@ class Game {
 					this.blob.stopMoveDown();
 				}
             },
-            [CONTROLS.dash]: { // d
+            68: { // d
                 up: () => {},
                 down: () => {}
             },
             90: { // z, debug
                 up: () => {
-                    this.blob.body.render.sprite.yScale -= 0.1;
-                    //this.blob.body.render.sprite.xScale -= 0.1;
-                    //this.blob.body.render.sprite.yOffset += 0.1;
+                    this.blob.body.render.sprite.yScale += 0.1;
+                    this.blob.body.render.sprite.xScale -= 0.1;
+                    this.blob.body.render.sprite.yOffset += 0.1;
                 },
                 down: () => {}
             },
             88: { // x, debug
                 up: () => {
-                    //this.blob.body.render.sprite.yScale -= 0.1;
-                    //this.blob.body.render.sprite.xScale += 0.1;
+                    this.blob.body.render.sprite.yScale -= 0.1;
+                    this.blob.body.render.sprite.xScale += 0.1;
                     this.blob.body.render.sprite.yOffset -= 0.1;
                 },
                 down: () => {}
             },
-
 			20: { //Caps lock
 				up: () =>{
 					this.blob.isFrozen = true;
@@ -256,11 +257,11 @@ class Game {
 			}
         };
         
-        var t = this;
+        var t = this; this.bob = 0;
         document.addEventListener('keydown', e => {t.handleKeyDown(e)}, false);
         document.addEventListener('keyup', e => {t.handleKeyUp(e)}, false);
         setInterval(function() {t.loop()}, 16.666666);
-
+		
         Matter.Events.on(this.engine, 'collisionStart', e => {
             var pairs = e.pairs[0];
             if (
@@ -268,9 +269,10 @@ class Game {
                 (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'ground')
             ) {
                 this.blob.isOnGround = true;
+				this.bob = 0;
 				
             }
-
+			this.blob.isBounce = true;;
             if (
                 (pairs.bodyA.label == 'blob' && pairs.bodyB.label == 'wall') ||
                 (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'wall')
@@ -282,25 +284,26 @@ class Game {
                 this.blob.touchWall.start = true;
             }
         });
-
-        this.bob = 0;
     }
 
     loop() {
-        this.bob++;
-        this.bob %= 41;
-        if (this.bob == 0) this.bob++;
+		if(this.blob.isBounce){
+			this.bob++;
+			//this.bob %= 41;
+			if (this.bob == 21) this.blob.isBounce = false;
+			
+			var duration = this.blob.isShortBounce ? 5: 20;
+			
+			var yScale = getHCompScale(20, this.bob);
+			var yOffset = getYBCompOffset(yScale);
 
-        var yScale = getHCompScale(40, this.bob);
-        var yOffset = getYBCompOffset(yScale);
+			var xScale = getVCompScale(20, this.bob);
 
-        var xScale = getVCompScale(40, this.bob);
+			this.blob.body.render.sprite.yScale = yScale;
+			this.blob.body.render.sprite.yOffset = yOffset;
 
-        this.blob.body.render.sprite.yScale = yScale;
-        this.blob.body.render.sprite.yOffset = yOffset;
-
-        this.blob.body.render.sprite.xScale = xScale;
-
+			this.blob.body.render.sprite.xScale = xScale;
+		}
         if (this.blob.touchWall.start) {
             this.blob.fixInPlace()
             console.log(this.blob.touchWall.timer)
@@ -361,10 +364,12 @@ class Game {
         }
         
         if(this.blob.isMovingUp){
+			
 			this.blob.doMoveUp();
 		}
 
 		if (this.blob.isHoldingJump) {
+			this.blob.bounce();
             this.blob.jump();
         }
     }
