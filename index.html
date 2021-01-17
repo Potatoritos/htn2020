@@ -6,13 +6,58 @@
 			<link rel="preconnect" href="https://fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
     </head>
+    <style>
+        body {
+            background-color: #EEEEEE;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #2C2B2B;
+        }
+        .center {
+            text-align: center;
+        }
+        .left {
+            text-align: left;
+        }
+        .levelbutton {
+            border: 1px solid #2C2B2B;
+            width: 50px;
+            height: 50px;
+            background-color: #EEEEEE;
+            color: #2C2B2B;
+        }
+        .levelbutton:hover {
+            color: #EEEEEE;
+            background-color: #2C2B2B;
+        }
+        .levelbutton:active {
+            background-color: #EEEEEE;
+            color: #2C2B2B;
+        }
+        #footer {
+            position: fixed;
+            bottom: 0;
+            color: #7e7c7c;
+        }
+        #footer a {
+            color: #7e7c7c;
+        }
+        #footer a:visited {
+            color: #7e7c7c;
+        }
+        #levelselect {
+            border: 0px solid #EEEEEE;
+        }
+    </style>
     <body>
         <!--<canvas id="display" width="800" height="600" style="border:1px solid black"></canvas>-->
 		<!--<div style="float:right; color:white;">-->
 		<!--<h3>Timer</h3>-->
 		<!--<h1 id="timer"></h1>-->
 		<!--</div>-->
-        <div id="maindiv", style="text-align:center"></div>
+        <div id="maindiv" class="center"></div>
+        <div id="leveldiv" class="center"></div> 
+        <p id="footer">blob bounce • <a href="https://github.com/Potatoritos/htn2020">GitHub</p>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.14.2/matter.min.js"></script>
         <script src="main.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
