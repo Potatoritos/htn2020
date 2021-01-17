@@ -38,13 +38,11 @@ const LEVELS = {
     1: {
         spawnpoint: [600, 0],
         blocks: [
-            [BLOCKS.ground, 400, 600, 2010, 60],
-            [BLOCKS.wall, 0, 900, 10, 4000],
-            [BLOCKS.wall, 400, -50, 2010, 10],
-            [BLOCKS.ground, 300, 470, 900, 10],
-            [BLOCKS.ground, 1200, 380, 2100, 10],
-            [BLOCKS.death, 450, 300, 30, 80],
-            [BLOCKS.win, 470, 300, 30, 80]
+            [BLOCKS.ground, 400, 600, 1200, 60],
+            [BLOCKS.ground, 400, 820, 1200, 60],
+            [BLOCKS.wall, 0, 800, 10, 4000],
+            [BLOCKS.wall, 1200, 800, 10, 4000],
+            
         ]
     },
     2: {
@@ -66,7 +64,114 @@ const LEVELS = {
             [BLOCKS.wall, 400, -50, 2010, 10],
             [BLOCKS.ground, 300, 470, 900, 10],
             [BLOCKS.ground, 1200, 380, 2100, 10],
-            [BLOCKS.death, 450, 300, 30, 80],
+            [BLOCKS.death, 450, 300, 30, 80]
+        ]
+    },
+    4: {
+        spawnpoint: [50, 600],
+        blocks: [
+            [BLOCKS.ground, 0, 800, 300, 60],
+            [BLOCKS.ground, 170, 670, 10, 20],
+            [BLOCKS.death, 170, 660, 10, 3],
+
+            [BLOCKS.ground, 560, 390, 10, 20],
+            [BLOCKS.death, 560, 380, 10, 3],
+            
+            [BLOCKS.ground, 390, 520, 200, 20],
+
+            [BLOCKS.win, 800, 300, 200, 20],
+            
+            [BLOCKS.death, 750, 800, 1200, 60],
+            [BLOCKS.wall, 0, 800, 10, 4000],
+            [BLOCKS.wall, 140, 770, 10, 30]
+        ]
+    },
+    5: {
+        spawnpoint: [50, 500],
+        blocks: [
+            [BLOCKS.ground, 0, 600, 300, 20],
+            
+            [BLOCKS.ground, 1200, 600, 300, 20],
+            
+            //[BLOCKS.ground, 900, 350, 150, 20],
+            
+            //[BLOCKS.ground, 0, 350, 350, 20],
+            
+            [BLOCKS.ground, 400, 600, 10, 500],
+            
+            //[BLOCKS.ground, 0, 350, 350, 20],
+            
+            [BLOCKS.ground, 0, 200, 2400, 20],
+
+            //[BLOCKS.win, 800, 300, 200, 20],
+            
+            [BLOCKS.death, 0, 800, 2400, 60],
+            [BLOCKS.wall, 0, 800, 10, 4000],
+            [BLOCKS.wall, 1200, 800, 10, 4000],
+        ]
+    },
+    6: {
+        spawnpoint: [50, 500],
+        blocks: [
+            [BLOCKS.ground, 50, 600, 700, 20],
+
+            [BLOCKS.win, -10, 785, 700, 30],
+            
+            //[BLOCKS.ground, 1200, 600, 300, 20],
+            
+            //[BLOCKS.ground, 900, 350, 150, 20],
+            
+            //[BLOCKS.ground, 0, 350, 350, 20],
+            
+            [BLOCKS.ground, 400, 460, 10, 300],
+            
+            //[BLOCKS.ground, 0, 350, 350, 20],
+            
+            [BLOCKS.ground, 0, 200, 2400, 20],
+
+            //[BLOCKS.win, 800, 300, 200, 20],
+            
+            [BLOCKS.death, 1535, 800, 2400, 60],
+            [BLOCKS.wall, 0, 800, 10, 4000],
+            [BLOCKS.wall, 1200, 800, 10, 4000],
+        ]
+    },
+    7: {
+        spawnpoint: [50, 500],
+        blocks: [
+            [BLOCKS.ground, 50, 600, 300, 20],
+            
+            [BLOCKS.ground, 300, 600, 20, 20],
+            [BLOCKS.ground, 400, 600, 20, 20],
+            [BLOCKS.ground, 500, 600, 20, 20],
+            [BLOCKS.ground, 600, 600, 20, 20],
+            [BLOCKS.ground, 700, 600, 20, 20],
+            [BLOCKS.ground, 800, 600, 20, 20],
+            [BLOCKS.ground, 900, 600, 20, 20],
+            [BLOCKS.ground, 1000, 600, 20, 20],
+    
+            [BLOCKS.ground, 1200, 600, 200, 20],
+            [BLOCKS.win, 1250, 585, 200, 10],
+
+            //[BLOCKS.win, -10, 785, 700, 30],
+            
+            //[BLOCKS.ground, 1200, 600, 300, 20],
+            
+            //[BLOCKS.ground, 900, 350, 150, 20],
+            
+            //[BLOCKS.ground, 0, 350, 350, 20],
+            
+            //[BLOCKS.ground, 400, 460, 10, 300],
+            
+            //[BLOCKS.ground, 0, 350, 350, 20],
+            
+            [BLOCKS.ground, 0, 500, 2400, 20],
+
+            //[BLOCKS.win, 800, 300, 200, 20],
+            
+            [BLOCKS.death, 1005, 800, 2400, 60],
+            [BLOCKS.wall, 0, 800, 10, 4000],
+            [BLOCKS.wall, 1200, 800, 10, 4000],
         ]
     }
 };
