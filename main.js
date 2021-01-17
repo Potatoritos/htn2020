@@ -76,7 +76,7 @@ class Blob {
     }
     doMoveUp() {
         if (this.isFrozen) return;
-        Matter.Body.setVelocity(this.body, {y:this.moveSpeed, x:this.body.velocity.x});
+        Matter.Body.setVelocity(this.body, {y:-15, x:this.body.velocity.x});
     }
     stopMoveUp() {
         this.isMovingUp = false;
@@ -276,7 +276,12 @@ class Game {
                 if (this.blob.touchWall.x==-1){
                     this.blob.startMoveLeft();
                 }
-                this.blob.startMoveUp()
+                if (this.blob.touchWall.y==1){
+                    this.blob.doMoveUp()
+                }
+                if (this.blob.touchWall.y==-1){
+                    this.blob.doMoveDown()
+                }
 
                 //console.log(this.blob.touchWall.keys)
                 //console.log(this.blob.touchWall.x)
@@ -294,7 +299,12 @@ class Game {
         
 		if(this.blob.isMovingDown){
 			this.blob.doMoveDown();
+        }
+        
+        if(this.blob.isMovingUp){
+			this.blob.doMoveUp();
 		}
+
 		if (this.blob.isHoldingJump) {
             this.blob.jump();
         }
