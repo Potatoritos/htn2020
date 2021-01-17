@@ -232,7 +232,7 @@ class Blob {
     dashUp() {
         if (this.usedUpDash) return;
         Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.dashUpSpeed});
-        this.usedDashUp = true;
+        this.usedUpDash = true;
     }
 
     jump() {
