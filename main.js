@@ -14,6 +14,10 @@ var gameOver = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label
 gameOver.render.sprite.texture = "img/gameover.png";
 
 
+var winGame = Matter.Bodies.rectangle(450, 250, 500, 300, {isStatic:true, label:'winGame', render:{fillStyle:'red'}});
+winGame.render.sprite.texture = "img/youwon.png";
+
+
 function getCompScale(duration, frame, scaleTo) {
     // duration is how many frames the animation has
     // frame is the current frame of the animation
@@ -218,8 +222,9 @@ class Game {
 		wall.restitution = 1.7;
 		
 		var dieBlock = Matter.Bodies.rectangle(450, 540, 30, 80, {isStatic:true, label:'die', render:{fillStyle:'red'}});
-		
-        Matter.World.add(this.engine.world, [ground, wall, this.blob.body, dieBlock]);
+		var winBlock = Matter.Bodies.rectangle(470, 540, 30, 80, {isStatic:true, label:'win', render:{fillStyle:'green'}});
+
+        Matter.World.add(this.engine.world, [ground, wall, this.blob.body, dieBlock, winBlock]);
 
         Matter.Engine.run(this.engine);
         Matter.Render.run(this.render);
@@ -325,7 +330,13 @@ class Game {
 				this.blob.isFrozen = true;
 				this.blob.body.render.sprite.texture = "img/sadblob.png";
 				this.blob.isLost = true;
-			}	
+			}
+			if(pairs.bodyA.label ==="win" || pairs.bodyB.label === "win"){
+				Matter.World.add(this.engine.world, [winGame]);
+				window.timer = true;
+				this.blob.isFrozen = true;
+
+			}
 			this.blob.isBounce = true;
 			this.blob.usedDash = false;
             if (
