@@ -494,18 +494,6 @@ class Game {
 						}
                     }
                 }));
-			},
-			[BLOCKS.wallj]: block =>{
-				blocks.push(Matter.Bodies.rectangle(block[1], block[2], block[3], block[4], {
-                    isStatic: true,
-                    label: 'wallj',
-                    render: {
-                        fillStyle: COLOURS.green,
-						sprite:{//FIX THIS SHIT
-							texture: "img/movement.png"
-						}
-                    }
-                }));
 			}
         }
 
