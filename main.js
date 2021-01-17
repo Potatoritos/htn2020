@@ -260,16 +260,12 @@ class Game {
                 this.blob.touchWall.start = true;
             }
         });
-		/*Matter.Events.on(this.engine, 'collisionEnd', e=> {
-			this.blob.body.render.sprite.yScale += 0.1;
-			this.blob.body.render.sprite.xScale -= 0.1;
-			this.blob.body.render.sprite.yOffset += 0.1;
-        });*/
+
     }
 
     loop() {
 
-        if (this.blob.touchWall.start && 0==1) {
+        if (this.blob.touchWall.start) {
             this.blob.fixInPlace()
             console.log(this.blob.touchWall.timer)
             this.blob.touchWall.timer++
