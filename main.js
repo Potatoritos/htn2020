@@ -20,6 +20,8 @@ class Blob {
         this.isMovingLeft = false;
         this.isMovingRight = false;
         this.isHoldingJump = false;
+        this.isMovingUp = false;
+        this.isMovingDown = false;
 
         this.isFrozen = false;
         
@@ -65,6 +67,32 @@ class Blob {
     }
     stopMoveRight() {
         this.isMovingRight = false;
+    }
+
+    startMoveUp() { // same here
+        if (this.isMovingDown) this.stopMoveDown();
+        this.isMovingUp = true;
+        //this.body.render.sprite.texture = 'img/blobflipped.png';
+    }
+    doMoveUp() {
+        if (this.isFrozen) return;
+        Matter.Body.setVelocity(this.body, {y:this.moveSpeed, x:this.body.velocity.x});
+    }
+    stopMoveUp() {
+        this.isMovingUp = false;
+    }
+
+    startMoveDown() { // same here
+        if (this.isMovingUp) this.stopMoveUp();
+        this.isMovingDown = true;
+        //this.body.render.sprite.texture = 'img/blobflipped.png';
+    }
+    doMoveDown() {
+        if (this.isFrozen) return;
+        Matter.Body.setVelocity(this.body, {y:-this.moveSpeed, x:this.body.velocity.x});
+    }
+    stopMoveDown() {
+        this.isMovingDown = false;
     }
 
     holdJump() {
@@ -138,6 +166,14 @@ class Game {
                     this.blob.stopMoveRight();
                 }
             },
+            67: { // c, debug
+                up: () => {
+                    this.blob.startMoveUp();
+                },
+                down: () => {
+                    this.blob.stopMoveUp();
+                }
+            },
             40: { //down
                 up: () => {},
                 down: () => {}
@@ -202,20 +238,20 @@ class Game {
     loop() {
 
         if (this.blob.touchWall.start) {
-            this.blob.isFrozen=true
+            this.blob.fixInPlace()
             console.log(this.blob.touchWall.timer)
             this.blob.touchWall.timer++
 
-            if (this.keys[74]!=true && this.blob.touchWall.keys[1]){
+            if (this.keys[37]!=true && this.blob.touchWall.keys[1]){
                 this.blob.touchWall.x = -1
             }
-            if (this.keys[73]!=true && this.blob.touchWall.keys[0]){
+            if (this.keys[38]!=true && this.blob.touchWall.keys[0]){
                 this.blob.touchWall.y = 1
             }
-            if (this.keys[75]!=true && this.blob.touchWall.keys[2]){
+            if (this.keys[40]!=true && this.blob.touchWall.keys[2]){
                 this.blob.touchWall.y = -1
             }
-            if (this.keys[76]!=true && this.blob.touchWall.keys[3]){
+            if (this.keys[39]!=true && this.blob.touchWall.keys[3]){
                 this.blob.touchWall.x = 1
             }
 
@@ -225,10 +261,21 @@ class Game {
             this.blob.touchWall.keys[3] = this.keys[39] //wasd
 
             if (this.blob.touchWall.timer == 31){
-                this.blob.isFrozen=false
+                this.blob.unFixInPlace()
+                this.blob.touchWall.timer = 0
+                this.blob.touchWall.start = false
+                console.log(this.blob.touchWall.x)
+                if (this.blob.touchWall.x==1){
+                    this.blob.startMoveRight();
+                }
+                if (this.blob.touchWall.x==-1){
+                    this.blob.startMoveLeft();
+                }
+                this.blob.startMoveUp()
+
                 //console.log(this.blob.touchWall.keys)
-                console.log(this.blob.touchWall.x)
-                console.log(this.blob.touchWall.x)
+                //console.log(this.blob.touchWall.x)
+                //console.log(this.blob.touchWall.y)
             }
         }
 
@@ -251,7 +298,7 @@ class Game {
             this.keyFuncs[e.keyCode].up();
         }
 
-        console.log(e.keyCode);
+        //console.log(e.keyCode);
     }
 
     handleKeyUp(e) {
