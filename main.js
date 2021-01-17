@@ -517,7 +517,7 @@ class Game {
                     render: {
                         fillStyle: COLOURS.blue,
 						sprite:{
-							texture: "img/movement.png"
+							texture: "img/Movement.png"
 						}
                     }
                 }));
