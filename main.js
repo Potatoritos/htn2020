@@ -88,8 +88,8 @@ class Blob {
         //this.body.render.sprite.texture = 'img/blobflipped.png';
     }
     doMoveDown() {
-        if (this.isFrozen) return;
-        Matter.Body.setVelocity(this.body, {y:-this.moveSpeed, x:this.body.velocity.x});
+        if (this.isOnGround || this.isFrozen) return;
+        Matter.Body.setVelocity(this.body, {y:15, x:this.body.velocity.x});
     }
     stopMoveDown() {
         this.isMovingDown = false;
@@ -175,8 +175,12 @@ class Game {
                 }
             },
             40: { //down
-                up: () => {},
-                down: () => {}
+                up: () => {
+					this.blob.startMoveDown();
+				},
+                down: () => {
+					this.blob.stopMoveDown();
+				}
             },
             68: { // d
                 up: () => {},
@@ -220,6 +224,7 @@ class Game {
                 (pairs.bodyB.label == 'blob' && pairs.bodyA.label == 'ground')
             ) {
                 this.blob.isOnGround = true;
+				
             }
 
             if (
@@ -282,10 +287,15 @@ class Game {
         if (this.blob.isMovingLeft) {
             this.blob.doMoveLeft();
         }
+		
         if (this.blob.isMovingRight) {
             this.blob.doMoveRight();
         }
-        if (this.blob.isHoldingJump) {
+        
+		if(this.blob.isMovingDown){
+			this.blob.doMoveDown();
+		}
+		if (this.blob.isHoldingJump) {
             this.blob.jump();
         }
     }
