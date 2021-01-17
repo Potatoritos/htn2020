@@ -299,8 +299,6 @@ class Game {
             }
         });
 
-        console.log(this.level);
-
         this.blob = new Blob(LEVELS[this.level].spawnpoint);
 
         var blocks = [];
@@ -627,9 +625,13 @@ var game;
 function startGame(level) {
     if (typeof game !== 'undefined') {
         game.stop();
+        var button = document.getElementById("levelbutton" + game.level.toString());
+        button.className = "levelbutton";
     }
     game = new Game(level);
     game.start();
+    var button = document.getElementById("levelbutton" + level.toString());
+    button.className = "currentlevelbutton";
 }
 
 var leveldiv = document.getElementById("leveldiv");
@@ -638,6 +640,7 @@ const levellength = Object.keys(LEVELS).length;
 for (let i = 1; i <= levellength; ++i) {
     var button = document.createElement('button');
     button.innerHTML = i.toString();
+    button.id = "levelbutton" + i.toString();
     button.className = "levelbutton";
     button.onclick = function() {startGame(i)};
     leveldiv.appendChild(button);
