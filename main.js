@@ -5,13 +5,16 @@ const CONTROLS = {
     moveRight:  76, // l
     dashLeft:   83, // s
     dashRight:  70, // f
-    dashUp:     68  // d
+    dashUp:     68, // d
+    restart:    81  // q
 };
 
-/* 37 left arrow
+/* 
+ * 37 left arrow
  * 39 right arrow
  * 38 up arrow
  * 40 down arrow
+ *
  */
 
 const COLOURS = {
@@ -45,6 +48,17 @@ const LEVELS = {
         ]
     },
     2: {
+        spawnpoint: [200, 0],
+        blocks: [
+            [BLOCKS.ground, 400, 600, 2010, 60],
+            [BLOCKS.wall, 0, 900, 10, 4000],
+            [BLOCKS.wall, 400, -50, 2010, 10],
+            [BLOCKS.ground, 300, 470, 900, 10],
+            [BLOCKS.ground, 1200, 380, 2100, 10],
+            [BLOCKS.death, 450, 300, 30, 80],
+        ]
+    },
+    3: {
         spawnpoint: [200, 0],
         blocks: [
             [BLOCKS.ground, 400, 600, 2010, 60],
@@ -495,18 +509,20 @@ class Game {
                 (pairs.bodyA.label === 'blob' && pairs.bodyB.label === 'death') ||
                 (pairs.bodyB.label === 'death' && pairs.bodyA.label === 'blob')
             ) {
-				Matter.World.add(this.engine.world, [gameOver]);	
-				this.blob.isFrozen = true;	
-				this.blob.body.render.sprite.texture = "img/sadblob.png";	
-				this.blob.isLost = true;	
+				//Matter.World.add(this.engine.world, [gameOver]);	
+				//this.blob.isFrozen = true;	
+				//this.blob.body.render.sprite.texture = "img/sadblob.png";	
+				//this.blob.isLost = true;	
+                this.displayLoss();
 			}	
             if (
                 (pairs.bodyA.label === 'blob' && pairs.bodyB.label === 'win') ||
                 (pairs.bodyB.label === 'win' && pairs.bodyA.label === 'blob')
             ) {
-				Matter.World.add(this.engine.world, [winGame]);	
-				window.timer = true;	
-				this.blob.isFrozen = true;	
+                this.displayWin();
+				//Matter.World.add(this.engine.world, [winGame]);	
+				//window.timer = true;	
+				//this.blob.isFrozen = true;	
 			}
         });
     }
@@ -583,6 +599,16 @@ class Game {
 		}
     }
 
+    displayLoss() {
+        this.blob.fixInPlace();
+        document.getElementById('losediv').style.display = 'block';
+    }
+
+    displayWin() {
+        this.blob.fixInPlace();
+        document.getElementById('windiv').style.display = 'block';
+    }
+
     handleKeyDown(e) {
         if (this.keys[e.keyCode]) return;
         this.keys[e.keyCode] = true;
@@ -619,6 +645,20 @@ class Game {
     }
 }
 
+//window.timer = false;
+//var now = new Date().getTime();
+
+//function formatTime(ms) {
+  //var format = "mm:ss:SS";
+  //if (ms > 3600000) {
+    //format = "HH:mm:ss:SS";
+  //}
+  //return moment().startOf('day').add(ms, 'milliseconds').format(format);
+//}
+//setInterval(function(){
+    //if(!window.timer)
+    //document.getElementById("timer").innerHTML = formatTime(new Date().getTime()-now);
+//}, 1);
 
 var game;
 
@@ -628,11 +668,28 @@ function startGame(level) {
         var button = document.getElementById("levelbutton" + game.level.toString());
         button.className = "levelbutton";
     }
+    document.getElementById('windiv').style.display = 'none';
+    document.getElementById('losediv').style.display = 'none';
     game = new Game(level);
     game.start();
     var button = document.getElementById("levelbutton" + level.toString());
     button.className = "currentlevelbutton";
+    document.getElementById('wintext').innerHTML = 'Level ' + level.toString() + ' clear!';
+    document.getElementById('losetext').innerHTML = 'Level ' + level.toString() + ' failed!';
 }
+
+var pressingRestart = false;
+document.addEventListener('keydown', e => {
+    if (pressingRestart || e.keyCode != CONTROLS.restart) return;
+    pressingRestart = true;
+    const lvl = game.level;
+    startGame(lvl);
+}, false);
+document.addEventListener('keyup', e => {
+    if (e.keyCode == CONTROLS.restart) {
+        pressingRestart = false;
+    }
+}, false);
 
 var leveldiv = document.getElementById("leveldiv");
 const levellength = Object.keys(LEVELS).length;
