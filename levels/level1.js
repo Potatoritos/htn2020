@@ -193,11 +193,14 @@ class Blob {
 
     jumpLarge() {
         if (!this.isOnGround || this.isFrozen || !this.isChargingJump) return;
-
-        Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.chargingJumpSpeed});
+        var speed = Math.min(-this.chargingJumpSpeed, -this.jumpSpeed);
+        Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:speed});
+        console.log(this.chargingJumpSpeed);
         this.isChargingJump = false;
         this.chargingJumpSpeed = 0;
+        this.isOnGround = false; // so jump() doesnt override this
     }
+
 
     jumpShort() { //also resets x velocity
         if (this.body.velocity.y < -this.jumpShortSpeed) {
@@ -238,14 +241,16 @@ class Game {
 
 		var plat1 = Matter.Bodies.rectangle(300, 470, 900, 10, {isStatic:true, label:'ground'});
 		var plat2 = Matter.Bodies.rectangle(1200, 380, 2100, 10, {isStatic:true, label:'ground'});
-
-
+		var plat3 = Matter.Bodies.rectangle(300, 270, 80, 10, {isStatic:true, label:'ground'});
+		var plat4 = Matter.Bodies.rectangle(800, 270, 200, 10, {isStatic:true, label:'ground'});
 
 		
-		var dieBlock = Matter.Bodies.rectangle(450, 300, 30, 80, {isStatic:true, label:'die', render:{fillStyle:'red'}});
-		var winBlock = Matter.Bodies.rectangle(470, 300, 30, 80, {isStatic:true, label:'win', render:{fillStyle:'green'}});
 
-        Matter.World.add(this.engine.world, [ground, wall, wall1,ceiling, plat1, plat2,this.blob.body, dieBlock, winBlock]);
+		
+		var dieBlock = Matter.Bodies.rectangle(750, 320, 900, 80, {isStatic:true, label:'die', render:{fillStyle:'red'}});
+		var winBlock = Matter.Bodies.rectangle(820, 240, 30, 80, {isStatic:true, label:'win', render:{fillStyle:'green'}});
+
+        Matter.World.add(this.engine.world, [ground, wall, wall1,ceiling, plat1, plat2,plat3,plat4,this.blob.body, dieBlock, winBlock]);
 
         Matter.Engine.run(this.engine);
         Matter.Render.run(this.render);

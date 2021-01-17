@@ -193,11 +193,14 @@ class Blob {
 
     jumpLarge() {
         if (!this.isOnGround || this.isFrozen || !this.isChargingJump) return;
-
-        Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:-this.chargingJumpSpeed});
+        var speed = Math.min(-this.chargingJumpSpeed, -this.jumpSpeed);
+        Matter.Body.setVelocity(this.body, {x:this.body.velocity.x, y:speed});
+        console.log(this.chargingJumpSpeed);
         this.isChargingJump = false;
         this.chargingJumpSpeed = 0;
+        this.isOnGround = false; // so jump() doesnt override this
     }
+
 
     jumpShort() { //also resets x velocity
         if (this.body.velocity.y < -this.jumpShortSpeed) {
