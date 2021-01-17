@@ -32,23 +32,29 @@ const BLOCKS = {
 };
 
 const LEVELS = {
-    1: [
-        [BLOCKS.ground, 400, 600, 2010, 60],
-        [BLOCKS.wall, 0, 900, 10, 4000],
-        [BLOCKS.wall, 400, -50, 2010, 10],
-        [BLOCKS.ground, 300, 470, 900, 10],
-        [BLOCKS.ground, 1200, 380, 2100, 10],
-        [BLOCKS.death, 450, 300, 30, 80],
-        [BLOCKS.win, 470, 300, 30, 80]
-    ],
-    2: [ // test
-        [BLOCKS.ground, 400, 600, 2010, 60],
-        [BLOCKS.wall, 0, 900, 10, 4000],
-        [BLOCKS.wall, 400, -50, 2010, 10],
-        [BLOCKS.ground, 300, 470, 900, 10],
-        [BLOCKS.ground, 1200, 380, 2100, 10],
-        [BLOCKS.death, 450, 300, 30, 80]
-    ]
+    1: {
+        spawnpoint: [600, 0],
+        blocks: [
+            [BLOCKS.ground, 400, 600, 2010, 60],
+            [BLOCKS.wall, 0, 900, 10, 4000],
+            [BLOCKS.wall, 400, -50, 2010, 10],
+            [BLOCKS.ground, 300, 470, 900, 10],
+            [BLOCKS.ground, 1200, 380, 2100, 10],
+            [BLOCKS.death, 450, 300, 30, 80],
+            [BLOCKS.win, 470, 300, 30, 80]
+        ]
+    },
+    2: {
+        spawnpoint: [200, 0],
+        blocks: [
+            [BLOCKS.ground, 400, 600, 2010, 60],
+            [BLOCKS.wall, 0, 900, 10, 4000],
+            [BLOCKS.wall, 400, -50, 2010, 10],
+            [BLOCKS.ground, 300, 470, 900, 10],
+            [BLOCKS.ground, 1200, 380, 2100, 10],
+            [BLOCKS.death, 450, 300, 30, 80],
+        ]
+    }
 };
 
 const BLOB_HEIGHT = 98;
@@ -86,8 +92,8 @@ function getXCompOffset(scale) { // does not work i think
 }
 
 class Blob {
-    constructor() {
-        this.body = Matter.Bodies.rectangle(400, 0, 50, 50, {
+    constructor(spawnpoint) {
+        this.body = Matter.Bodies.rectangle(spawnpoint[0], spawnpoint[1], 50, 50, {
             mass: 100,
             label: 'blob',
             inertia: 99999999999, // disable rotation (Infinity does not work)
@@ -293,7 +299,9 @@ class Game {
             }
         });
 
-        this.blob = new Blob();
+        console.log(this.level);
+
+        this.blob = new Blob(LEVELS[this.level].spawnpoint);
 
         var blocks = [];
 
@@ -345,7 +353,7 @@ class Game {
             }
         }
 
-        for (const block of LEVELS[this.level]) {
+        for (const block of LEVELS[this.level].blocks) {
             blockFuncs[block[0]](block);
         }
 
@@ -485,18 +493,22 @@ class Game {
                 //this.blob.touchWall.keys[3] = this.keys[39] //wasd
                 //this.blob.touchWall.start = true;
             }
-			if(pairs.bodyA.label ==="die" || pairs.bodyB.label === "die"){	
+            if (
+                (pairs.bodyA.label === 'blob' && pairs.bodyB.label === 'death') ||
+                (pairs.bodyB.label === 'death' && pairs.bodyA.label === 'blob')
+            ) {
 				Matter.World.add(this.engine.world, [gameOver]);	
 				this.blob.isFrozen = true;	
 				this.blob.body.render.sprite.texture = "img/sadblob.png";	
 				this.blob.isLost = true;	
 			}	
-			if(pairs.bodyA.label ==="win" || pairs.bodyB.label === "win"){	
+            if (
+                (pairs.bodyA.label === 'blob' && pairs.bodyB.label === 'win') ||
+                (pairs.bodyB.label === 'win' && pairs.bodyA.label === 'blob')
+            ) {
 				Matter.World.add(this.engine.world, [winGame]);	
 				window.timer = true;	
 				this.blob.isFrozen = true;	
-
-
 			}
         });
     }
@@ -609,6 +621,7 @@ class Game {
     }
 }
 
+
 var game;
 
 function startGame(level) {
@@ -617,6 +630,17 @@ function startGame(level) {
     }
     game = new Game(level);
     game.start();
+}
+
+var leveldiv = document.getElementById("leveldiv");
+const levellength = Object.keys(LEVELS).length;
+
+for (let i = 1; i <= levellength; ++i) {
+    var button = document.createElement('button');
+    button.innerHTML = i.toString();
+    button.className = "levelbutton";
+    button.onclick = function() {startGame(i)};
+    leveldiv.appendChild(button);
 }
 
 startGame(1);
