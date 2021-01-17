@@ -188,6 +188,23 @@ const LEVELS = {
             [BLOCKS.wall, 0, 800, 10, 4000],
             [BLOCKS.wall, 1200, 800, 10, 4000],
         ]
+    },
+    7: { // WIP
+        spawnpoint: [155, 600],
+        blocks: [
+            [BLOCKS.wall, 0, 0, 35, 2000],
+            [BLOCKS.ground, 36, 760, 305, 40],
+            [BLOCKS.ground, 303, 320, 146, 40]
+        ]
+    },
+    8: {
+        spawnpoint: [400, 400],
+        blocks: [
+            [BLOCKS.wall, 0, 0, 40, 3000],
+            [BLOCKS.ground, 0, 800, 4000, 40],
+            [BLOCKS.wall, 1200, 0, 40, 3000],
+            [BLOCKS.wall, 0, 0, 4000, 40]
+        ]
     }
 };
 
