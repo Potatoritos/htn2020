@@ -129,6 +129,14 @@
         <script src="main.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
 		<script>
+		if(localStorage.getItem('hide')=="") localStorage.setItem('hide', 0);
+		if(parseInt(localStorage.getItem('hide'))>=2){
+			$("#infodiv").hide();
+		} else{
+			localStorage.setItem('hide', parseInt(localStorage.getItem('hide'))+1);
+		}
+
+
 		$("#infodiv").click(
 			function(){
 				$("#infodiv").hide();
