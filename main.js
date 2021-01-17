@@ -192,11 +192,21 @@ const LEVELS = {
     7: { // WIP
         spawnpoint: [155, 600],
         blocks: [
-            [BLOCKS.wall, 0, 0, 35, 2000],
-            [BLOCKS.ground, 36, 760, 305, 40],
-            [BLOCKS.ground, 303, 320, 146, 40]
+            [BLOCKS.wall, 0, 0, 80, 2000],
+            [BLOCKS.ground, 36, 780, 395, 40],
+            [BLOCKS.wall, 250, 730, 40, 800],
+            [BLOCKS.ground, 303, 320, 146, 40],
+            [BLOCKS.ground, 40, 400, 40, 40],
+            [BLOCKS.death, 510, 270, 220, 30],
+            [BLOCKS.death, 560, 100, 1000, 40],
+            [BLOCKS.ground, 720, 320, 146, 40],
+            [BLOCKS.death, 560, 100, 1000, 40],
+            [BLOCKS.win, 600, 500, 40, 40], 
+            [BLOCKS.death, 1200, 500, 40, 1000], 
+            [BLOCKS.death, 800, 800, 1000, 40],
         ]
     },
+
     8: {
         spawnpoint: [400, 400],
         blocks: [
