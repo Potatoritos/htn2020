@@ -669,6 +669,7 @@ class Game {
                 (pairs.bodyB.label === 'win' && pairs.bodyA.label === 'blob')
             ) {
                 this.displayWin();
+				window.timer = true;
 				//Matter.World.add(this.engine.world, [winGame]);	
 				//window.timer = true;	
 				//this.blob.isFrozen = true;	
@@ -848,7 +849,7 @@ for (let i = 1; i <= levellength; ++i) {
     button.innerHTML = i.toString();
     button.id = "levelbutton" + i.toString();
     button.className = "levelbutton";
-    button.onclick = function() {startGame(i)};
+    button.onclick = function() {startGame(i); window.timer = false;		window.now = new Date().getTime();};
     leveldiv.appendChild(button);
 }
 

@@ -107,9 +107,9 @@
 		</div>
 		
         <div id="windiv" class="center">
-            <h1 id="wintext">Level complete!</h1>
-			<h3 style="margin: 0">Finished in:</h3>
-			<h3 style="margin: 0">a</h3>
+            <h1 id="wintext" style="margin-bottom:10px;">Level complete!</h1>
+			<h6 style="margin: 0">Finished in:</h6>
+			<h6	style="margin: 0" id="timer2">a</h6>
         </div>
         <div id="losediv" class="center">
             <h1 id="losetext">Level failed!</h1>
@@ -140,7 +140,7 @@
 		});
 		
 		window.timer = false;
-		var now = new Date().getTime();
+		window.now = new Date().getTime();
 		
 		function formatTime(ms) {
 		  var format = "mm:ss:SS";
@@ -150,8 +150,12 @@
 		  return moment().startOf('day').add(ms, 'milliseconds').format(format);
 		}
 		setInterval(function(){
-			if(!window.timer)
-			document.getElementById("timer").innerHTML = formatTime(new Date().getTime()-now);
+			if(!window.timer){
+				document.getElementById("timer").innerHTML = formatTime(new Date().getTime()-now);
+				document.getElementById("timer2").innerHTML = formatTime(new Date().getTime()-now);
+			} else{
+				
+			}
 		}, 1);
 
         </script>
