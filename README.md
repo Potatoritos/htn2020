@@ -6,7 +6,7 @@ Hack The North 2020 submission by me, [todaybrian](https://github.com/todaybrian
 
 2d platformer where you control a blob
 
-Playable at: https://potatoritos.github.io/htn2020/
+Playable at: https://potatoritos.github.io/htn2020/ (play on a 60hz screen; for some reason the rate the game runs is tied to refresh rate)
 
 
 
